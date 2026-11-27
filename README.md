@@ -1,55 +1,80 @@
-# TRAIN LOG — Hybrid Roadmap Edition
+# TRAIN LOG
 
-A single-user, offline-first workout tracker.
+An offline-first workout tracker for the three-stage hybrid training roadmap.
 
-## Included
-- Three selectable training stages, each with a seven-day rotation.
-- Stage 1 Foundation (weeks 1–6), Stage 2 Intermediate (weeks 7–14), Stage 3 Hybrid Development (month 4+).
-- Today workout logger with set completion, weight/reps, steppers, previous-session values and per-exercise rest timer.
-- Workout history, localStorage persistence, JSON export/import.
-- Gym Mode / Field Mode labels, outdoor stopwatch and lap capture.
-- Monthly performance check-ins with trend graph (vertical jump, 40m time and lift markers).
-- Tap exercise names for concise cues and links to exercise-demonstration searches.
-- Optional camera preview and MediaPipe pose-landmark overlay; model loads from a CDN on first use and needs internet. It is not a form-safety certification.
-- Food journal with quick meal check-ins and an offline rule-based training guide.
-- Flexible food and recovery reminders and a food journal (no calorie target or restrictive scoring).
-- PWA manifest, service worker and 192px/512px icons.
+## What's in the app
+- Three stages with a seven-day workout rotation.
+- Workout logging, previous-session values, rest timer, history and progress charts.
+- Gym/Field mode and outdoor stopwatch with lap splits.
+- On-device camera counter for bodyweight squats and push-ups. Counts are estimates, not a technique or safety check.
+- Offline training guide.
+- Optional live Gemini coach, activated only after you deploy the backend below.
+- Simple food journal with notes only. No AI meal feature, calorie scoring or protein targets.
+- Offline PWA support and JSON backup/restore.
 
-## Feature limitations
-- The built-in guide is offline and rule-based, not a connected LLM. A live Gemini coach and AI meal-photo estimates are not implemented; do not put private API keys in browser code.
-- The camera preview/landmarks are experimental visual references. No automatic rep validity, injury detection, or safe-lift verdict is claimed. Camera permission requires HTTPS; the MediaPipe model needs internet to download on first use.
-- Meal entries are journal notes, not AI calorie/protein estimates or a diet plan. The journal intentionally avoids calorie/protein scoring and bodyweight tracking.
+## Important limitations
+- The live AI coach is coded but will not respond until the Cloudflare Worker is deployed, its Gemini key is added as a secret, and its URL is saved in app Settings.
+- The camera counter estimates repetitions from pose landmarks. It can miscount and does not assess form, detect injury or certify that an exercise is safe. Camera video stays in the browser.
+- Workout data is stored in this browser on this device. Export a JSON backup regularly; clearing browser data or changing devices can remove local logs.
+- This is a tracking tool, not medical advice or a replacement for an in-person qualified coach. Advanced gymnastics, tumbling and parkour need qualified in-person supervision.
 
-## Safety notes
-This build is a tracking utility, not medical or coaching advice. Use age-appropriate, manageable resistance with qualified supervision. Advanced gymnastics, tumbling, parkour, deep shoulder positions and loaded spinal mobility are marked coach-led rather than provided as unsupervised instructions. Do not progress by deadline; involve a parent/guardian and qualified coach.
+## Open and install
+Open the GitHub Pages URL over HTTPS:
+https://vyrobusinessinquires-coder.github.io/training-log/
 
-## Publish on GitHub Pages
-Upload the contents of this folder to the root of the repository, preserving the `icons/` folder. In Settings → Pages choose Deploy from a branch, `main`, `/(root)`.
+On a phone, use the browser's **Add to Home Screen** or **Install app** option.
 
-## Install
-Open the HTTPS GitHub Pages URL on your phone and choose Add to Home Screen / Install app.
+## Live AI coach setup (optional)
 
-## Data
-Workout data is stored in localStorage on the device/browser. Export JSON backups regularly. Clearing browser data or changing devices can remove local logs unless restored from a backup.
+**You do not need to do this to use the workout tracker.** The offline guide works without any accounts or API keys.
 
+To turn on the live coach, a parent/guardian should help with these steps and review any provider usage or billing terms first.
 
-## Camera rep counter
-- The on-device camera guide can estimate bodyweight squat and push-up repetitions from visible pose landmarks.
-- Video processing stays in the browser; frames are not sent to the coach backend.
-- Counts are approximate and may be wrong when joints are hidden or the camera angle changes. This is not form analysis, injury detection, or a safety verdict. Use a clear space and comfortable bodyweight movements only; ask a qualified coach to assess technique.
+### What you need
+- A Google AI Studio API key.
+- A Cloudflare account.
+- Node.js installed on a computer.
+- This GitHub repository downloaded or cloned to that computer.
 
-## Optional Gemini coach backend
-The live coach is optional. The offline guide continues to work if no backend URL is configured.
+### Steps on Windows
+1. A parent/guardian creates or reviews the Gemini API key in Google AI Studio. Keep it private. Never paste it into GitHub, the app, or a chat.
+2. Install Node.js from https://nodejs.org/ if it is not already installed.
+3. Download this repository from GitHub and extract the ZIP.
+4. Open the extracted `training-log` folder. Click the address bar in File Explorer, type `cmd`, and press Enter.
+5. In the terminal, enter these commands one at a time:
 
-A Cloudflare Worker proxy is included in `worker/`. It keeps the Gemini API key server-side, restricts browser requests to the GitHub Pages origin, limits request size and message history, and applies per-IP rate limits (6 requests/minute and 40/day). Rate limits reduce accidental overuse but do not guarantee a spending cap. Review provider billing and account limits with a parent/guardian before enabling a paid API.
+   ```bat
+   cd worker
+   npx wrangler login
+   ```
 
-### Deploy (parent/guardian assistance recommended)
-1. Create or use a Google AI Studio API key and review its current billing, usage and data terms with a parent/guardian. Never paste the key into GitHub, this chat, or the PWA.
-2. Install Node.js and Wrangler on a computer with access to the repository, then open a terminal in the repository root.
-3. From the `worker` folder, run `npx wrangler login`.
-4. Add the key as a Worker secret: `npx wrangler secret put GEMINI_API_KEY`. Paste it only into the secure terminal prompt.
-5. Deploy from the `worker` folder with `npx wrangler deploy`.
-6. Copy the resulting `https://train-log-coach.<your-subdomain>.workers.dev/api/coach` URL into TRAIN LOG → Settings → Secure backend URL, then save it.
-7. Test with a general workout-planning question. If the Worker URL changes, update the saved endpoint.
+   A browser window will open. Sign in to the Cloudflare account and approve the connection.
 
-The Worker uses Google's Gemini `gemini-3.5-flash` generateContent endpoint. Do not deploy the Worker until a parent/guardian has reviewed provider costs and account settings. If you do not want an AI service, leave the endpoint blank and use the offline guide.
+6. Add the secret. In the same terminal, run:
+
+   ```bat
+   npx wrangler secret put GEMINI_API_KEY
+   ```
+
+   When asked, paste the Gemini key into the terminal prompt (not here, not in GitHub) and press Enter.
+
+7. Deploy the backend:
+
+   ```bat
+   npx wrangler deploy
+   ```
+
+8. Cloudflare will show a Worker address. Copy it and add `/api/coach` to the end. It should look like:
+
+   ```
+   https://train-log-coach.YOUR-SUBDOMAIN.workers.dev/api/coach
+   ```
+
+9. Open TRAIN LOG → **Settings** → **Secure backend URL**. Paste that full address and press **Save coach URL**.
+10. Open the Coach tab and test with a general question. If it does not connect, check the Worker deployment and URL.
+
+### If you do not want to set up AI
+Leave **Secure backend URL** empty. The offline training guide remains available. You can use the full workout app without Cloudflare or a Gemini key.
+
+## Developer validation
+GitHub Actions checks JavaScript syntax, Worker syntax, the PWA manifest, required icons and app-shell references. These automated checks do not replace testing on a real phone or deploying the optional AI backend.
