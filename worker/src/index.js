@@ -1,4 +1,4 @@
-const MODEL = "gemini-3.5-flash";
+const MODEL = "gemini-3.8-flash";
 const MAX_MESSAGE = 1000;
 const MAX_HISTORY = 8;
 const MINUTE_LIMIT = 6;
