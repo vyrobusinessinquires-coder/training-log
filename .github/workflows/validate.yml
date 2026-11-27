@@ -24,6 +24,7 @@ jobs:
           Path("/tmp/train-log-app.js").write_text(scripts[0], encoding="utf-8")
           PY
           node --check /tmp/train-log-app.js
+          node --check worker/src/index.js
       - name: Validate PWA manifest
         run: |
           python3 -m json.tool manifest.webmanifest > /dev/null
@@ -34,3 +35,6 @@ jobs:
           grep -q 'href="./manifest.webmanifest"' index.html
           grep -q "register('./sw.js')" index.html
           grep -q "train-log-shell-v5" sw.js
+          test -f worker/wrangler.toml
+          grep -q 'coachEndpoint' index.html
+          grep -q 'camera-reps' index.html
