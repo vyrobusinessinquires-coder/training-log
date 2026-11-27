@@ -792,7 +792,7 @@
     const btn=document.querySelector('[data-action="coach-send"]');if(btn){btn.disabled=true;btn.textContent='Thinking…';}
     try{
       const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),25000);
-      const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history,context:{stage:data.selectedStage||1,day:data.active?.day||data.rotationDay,workout:data.active?.title||todayRoutine().title}}),signal:controller.signal});
+      const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history,context:{stage:data.selectedStage||1,day:data.active?.day||data.rotationDay,workout:data.active?.title||todayRoutine().title,plan:todayRoutine().phases.map(p=>p.name+': '+p.exercises.map(e=>e.name).join(', ')).join(' | ').slice(0,1400)}}),signal:controller.signal});
       clearTimeout(timeout);
       const payload=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(payload.error||'The coach service is unavailable.');
