@@ -27,11 +27,11 @@ export default {
     if (!new URL(request.url).pathname.endsWith("/api/coach")) return json({ error: "Not found." }, 404, cors);
     if (!env.GEMINI_API_KEY) return json({ error: "Coach service is not configured yet." }, 503, cors);
 
-    const length = Number(request.headers.get("Content-Length") || 0);
-    if (length > 14000) return json({ error: "Request is too large." }, 413, cors);
+    const rawBody = await request.text();
+    if (new TextEncoder().encode(rawBody).byteLength > 14000) return json({ error: "Request is too large." }, 413, cors);
 
     let body;
-    try { body = await request.json(); } catch { return json({ error: "Invalid JSON." }, 400, cors); }
+    try { body = JSON.parse(rawBody); } catch { return json({ error: "Invalid JSON." }, 400, cors); }
     const message = typeof body.message === "string" ? body.message.trim().slice(0, MAX_MESSAGE) : "";
     if (!message) return json({ error: "Write a short question first." }, 400, cors);
 
