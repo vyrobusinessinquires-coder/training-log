@@ -1,0 +1,36 @@
+name: Validate TRAIN LOG
+on:
+  push:
+    branches:
+      - feature/train-log-upgrade
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check inline JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", html, re.S | re.I)
+          if len(scripts) != 1:
+              raise SystemExit(f"Expected one inline app script, found {len(scripts)}")
+          Path("/tmp/train-log-app.js").write_text(scripts[0], encoding="utf-8")
+          PY
+          node --check /tmp/train-log-app.js
+      - name: Validate PWA manifest
+        run: |
+          python3 -m json.tool manifest.webmanifest > /dev/null
+          test -f icons/icon-192.png
+          test -f icons/icon-512.png
+      - name: Check app shell references
+        run: |
+          grep -q 'href="./manifest.webmanifest"' index.html
+          grep -q "register('./sw.js')" index.html
+          grep -q "train-log-shell-v5" sw.js
