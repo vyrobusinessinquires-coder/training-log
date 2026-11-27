@@ -744,10 +744,13 @@
     const top=movement==='squat'?150:150,bottom=movement==='squat'?112:100;
     const now=Date.now();let cueText='Move smoothly through a comfortable range.';
     if(angle>top){
-      if(cameraCounter.phase==='Lowering'&&now-cameraCounter.lastRepAt>700){cameraCounter.reps++;cameraCounter.lastRepAt=now;cueText='Rep counted. Reset at the top and keep the next one controlled.';}
+      if(cameraCounter.phase==='Bottom'&&now-cameraCounter.lastRepAt>700){cameraCounter.reps++;cameraCounter.lastRepAt=now;cueText='Rep counted. Reset at the top and keep the next one controlled.';}
       cameraCounter.phase='Top';
-    }else if(angle<bottom){cameraCounter.phase='Lowering';cueText='Bottom position detected. Return smoothly; do not force extra depth.';}
-    else if(cameraCounter.phase==='Waiting'){cameraCounter.phase='Top';cueText='Ready. Begin only when you are comfortable.';}
+    }else if(angle<bottom){
+      if(cameraCounter.phase==='Top'){cameraCounter.phase='Bottom';cueText='Bottom position detected. Return smoothly; do not force extra depth.';}
+      else if(cameraCounter.phase==='Waiting')cueText='Start from a comfortable upright/top position, then move smoothly.';
+      else cueText='Return smoothly; do not force extra depth.';
+    }else if(cameraCounter.phase==='Waiting'){cueText='Move to a comfortable start position to begin.';}
     else cueText='Keep moving steadily; the counter is waiting for the next position.';
     const reps=document.getElementById('camera-reps'),phase=document.getElementById('camera-phase'),cue=document.getElementById('camera-cue');
     if(reps)reps.textContent=String(cameraCounter.reps);if(phase)phase.textContent=cameraCounter.phase;
