@@ -744,7 +744,6 @@
       const sides=[[11,13,15],[12,14,16]].filter(([a,b,c])=>[lm[a],lm[b],lm[c]].every(pointVisible));
       if(sides.length)angle=sides.reduce((n,[a,b,c])=>n+jointAngle(lm[a],lm[b],lm[c]),0)/sides.length;
     }
-    cameraSession.totalFrames++;
     if(angle===null){const cue=document.getElementById('camera-cue');if(cue)cue.textContent='Landmarks are not clear yet. Move the phone farther back and keep the relevant joints in frame.';return;}
     cameraSession.validFrames++;cameraSession.angles.push(angle);if(cameraSession.angles.length>900)cameraSession.angles.shift();cameraSession.cycleMin=Math.min(cameraSession.cycleMin,angle);cameraSession.cycleMax=Math.max(cameraSession.cycleMax,angle);
     const top=movement==='squat'?150:150,bottom=movement==='squat'?112:100;
@@ -768,6 +767,7 @@
     if(v.videoWidth){
       c.width=v.videoWidth;c.height=v.videoHeight;const ctx=c.getContext('2d');
       const res=poseTask.detectForVideo(v,performance.now());ctx.clearRect(0,0,c.width,c.height);
+      cameraSession.totalFrames++;
       const lm=res.landmarks?.[0];
       if(lm){
         const links=[[11,13],[13,15],[12,14],[14,16],[11,12],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
