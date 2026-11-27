@@ -51,6 +51,7 @@ export default {
       "Selected training stage: " + String(context.stage || "unknown").slice(0, 20),
       "Current rotation day: " + String(context.day || "unknown").slice(0, 20),
       "Current workout: " + String(context.workout || "not started").slice(0, 100),
+      "Routine outline: " + String(context.plan || "not provided").slice(0, 1400),
     ].join("\n");
 
     const contents = [...history, { role: "user", parts: [{ text: safeContext + "\n\nQuestion: " + message }] }];
