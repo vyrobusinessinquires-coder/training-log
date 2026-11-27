@@ -1,5 +1,5 @@
 /* TRAIN LOG offline app shell — safe for root and GitHub Pages sub-path hosting. */
-const CACHE_NAME = 'train-log-shell-v3';
+const CACHE_NAME = 'train-log-shell-v4';
 const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',
