@@ -1,0 +1,15 @@
+name = "train-log-coach"
+main = "src/index.js"
+compatibility_date = "2026-11-27"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGIN = "https://vyrobusinessinquires-coder.github.io"
+
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "CoachRateLimiter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CoachRateLimiter"]

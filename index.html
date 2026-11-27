@@ -155,8 +155,8 @@
     .chat-bubble.user{align-self:flex-end;border-color:#75402a}.chat-bubble.coach{align-self:flex-start}
     .meal-form{display:grid;gap:8px;padding:12px 16px}.meal-form textarea{min-height:76px;padding:10px;background:#080808;border:1px solid var(--line);color:white}
     .meal-entry{padding:12px 16px;border-top:1px solid var(--line);background:#101010}
-    .tabbar{grid-template-columns:repeat(7,1fr)}.tab{font-size:9px}.tab .tab-icon{font-size:16px}
-    @media(max-width:380px){.tab{font-size:8px}.tab .tab-icon{font-size:14px}.tabbar{padding-left:1px;padding-right:1px}}
+    .tabbar{display:flex;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;gap:2px;padding-left:6px;padding-right:6px}.tabbar::-webkit-scrollbar{display:none}.tab{flex:0 0 64px;font-size:9px}.tab .tab-icon{font-size:16px}
+    @media(max-width:380px){.tab{flex-basis:58px;font-size:8px}.tab .tab-icon{font-size:14px}}
 
     @media (min-width: 720px) {
       .app { max-width: 620px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
@@ -215,7 +215,7 @@
     <button class="tab" data-tab="coach"><span class="tab-icon">✳</span><span>Coach</span></button>
     <button class="tab" data-tab="settings"><span class="tab-icon">⚙</span><span>Settings</span></button>
   </nav>
-  <div class="cue-modal" id="camera-modal" role="dialog" aria-modal="true"><div class="cue-sheet"><div class="eyebrow">CAMERA FORM GUIDE</div><h2>Movement preview</h2><div class="camera-box"><video id="camera-video" autoplay playsinline muted></video><canvas id="pose-canvas"></canvas></div><div class="camera-status" id="camera-status">Camera is off. Start only in a private, well-lit space with enough room.</div><div class="stopwatch-actions"><button class="primary" data-action="camera-start">Start camera</button><button data-action="camera-stop">Stop</button></div><div class="row-sub">This is an experimental visual aid, not a safety check. Do not use it to decide whether a heavy lift, handstand, acrobatic skill or parkour movement is safe.</div><button class="secondary" style="width:100%;margin-top:10px" data-action="camera-close">Close</button></div></div>
+  <div class="cue-modal" id="camera-modal" role="dialog" aria-modal="true"><div class="cue-sheet"><div class="eyebrow">CAMERA FORM GUIDE</div><h2>Movement preview</h2><div class="camera-box"><video id="camera-video" autoplay playsinline muted></video><canvas id="pose-canvas"></canvas></div><div class="camera-status" id="camera-status">Camera is off. Start only in a private, well-lit space with enough room.</div><div class="row" style="margin:0 16px;padding:10px 12px"><label for="camera-movement" class="row-title">Movement counter</label><select id="camera-movement" style="width:100%;margin-top:8px"><option value="squat">Bodyweight squat</option><option value="pushup">Push-up</option></select><div class="tool-grid" style="margin-top:10px"><div class="tool-tile"><span>Estimated reps</span><strong id="camera-reps">0</strong></div><div class="tool-tile"><span>Movement phase</span><strong id="camera-phase" style="font-size:13px">Waiting</strong></div></div><div class="row-sub" id="camera-cue">Choose a movement, then start the camera. Keep the movement comfortable and unweighted.</div><button class="secondary" style="width:100%;margin-top:8px" data-action="camera-reset">Reset counter</button></div><div class="stopwatch-actions"><button class="primary" data-action="camera-start">Start camera</button><button data-action="camera-stop">Stop</button></div><div class="row-sub">Rep counts are rough estimates from visible landmarks, not verified repetitions or form scores. Use bodyweight movements only. Keep weights, jumps, handstands and acrobatic skills out of camera practice; ask a qualified coach to assess technique.</div><button class="secondary" style="width:100%;margin-top:10px" data-action="camera-close">Close</button></div></div>
   <div class="toast" id="toast" role="status"></div>
   <div class="cue-modal" id="cue-modal" role="dialog" aria-modal="true"><div class="cue-sheet"><div class="eyebrow">FORM CUE</div><h2 id="cue-title"></h2><p id="cue-copy"></p><a id="cue-video-link" href="#" target="_blank" rel="noopener" style="display:block;color:var(--orange);font-size:13px;margin:0 0 12px">Find an exercise demonstration ↗</a><button class="primary" style="width:100%" data-action="close-cue">Got it</button></div></div>
   <input id="import-file" type="file" accept="application/json,.json" class="hidden">
@@ -353,7 +353,7 @@
       version: 1,
       rotationDay: 1,
       selectedStage: 1,
-      settings: { defaultRest: 90, chime: true, exerciseRest: {} },
+      settings: { defaultRest: 90, chime: true, exerciseRest: {}, coachEndpoint: '' },
       active: null,
       history: [],
       fuelChecks: {},
@@ -679,10 +679,11 @@
   };
   function fieldToolsHtml(day){
     const isRun = day === 6;
+    if (data.fieldTimer?.day !== day) data.fieldTimer = { elapsed:0, startedAt:null, running:false, laps:[], day };
     return `<div class="section-label">Field stopwatch</div><div class="stopwatch"><div class="eyebrow">${isRun?'RUN / WALK TIMER':'SPRINT SPLIT TIMER'}</div><div class="stopwatch-time" id="field-clock">${formatClock(data.fieldTimer?.elapsed||0)}</div><div class="row-sub">${isRun?'Track your 25–35 minute easy session.':'Tap Start at the start line and Stop at the finish. Use a coach or training partner for timing when possible.'}</div><div class="stopwatch-actions"><button class="primary" data-action="field-start">${data.fieldTimer?.running?'Stop':'Start'}</button><button data-action="field-lap">Lap</button><button data-action="field-reset">Reset</button></div><div id="field-laps" class="row-sub">${(data.fieldTimer?.laps||[]).map((v,i)=>`Lap ${i+1}: ${formatClock(v)}`).join(' · ')}</div></div>`;
   }
   function renderProgress(){
-    const list=data.performance||[]; const metrics=[['vertical','Vertical jump','cm'],['sprint','40m time','s'],['squat','Squat','kg'],['bench','Bench','kg'],['deadlift','Deadlift','kg'],['bodyweight','Bodyweight','kg']];
+    const list=data.performance||[]; const metrics=[['vertical','Vertical jump','cm'],['sprint','40m time','s'],['squat','Squat','kg'],['bench','Bench','kg'],['deadlift','Deadlift','kg']];
     const latest=k=>[...list].reverse().find(x=>x[k]!==''&&x[k]!=null)?.[k];
     const metricCards=metrics.map(([k,n,u])=>`<div class="tool-tile"><span>${n}</span><strong>${latest(k)!=null?escapeHtml(latest(k))+' <small>'+u+'</small>':'—'}</strong></div>`).join('');
     const selected=metrics.find(m=>m[0]===data.metricView)?.[0]||'sprint'; const vals=list.filter(x=>x[selected]!==''&&x[selected]!=null).slice(-8); const max=Math.max(1,...vals.map(x=>Number(x[selected]))), min=Math.min(0,...vals.map(x=>Number(x[selected]))); const points=vals.map((x,i)=>`${vals.length<2?50:i*100/(vals.length-1)},${130-(Number(x[selected])-min)/(max-min||1)*110}`).join(' ');
@@ -690,37 +691,116 @@
   }
   function renderFuel(){
     const entries=(data.mealLog||[]).filter(x=>x.date===localDateKey());
-    document.getElementById('fuel-content').innerHTML=`<div class="section-label">Quick meal check-ins</div><div class="tool-grid">${[['Breakfast','Home breakfast'],['Recess','School snack'],['Lunch','School lunch'],['Pre-training','After-school snack'],['Dinner','Family dinner']].map(([a,b])=>`<button class="tool-tile" data-action="quick-meal" data-meal="${a}"><span>＋ ${a}</span><strong style="font-size:13px">${b}</strong></button>`).join('')}</div><div class="section-label">Add food or drink</div><div class="meal-form"><label>What did you have?<textarea id="meal-description" placeholder="e.g. rice, sinigang, vegetables, water"></textarea></label><label>Optional note<input id="meal-note" placeholder="How energized did you feel?"></label><div class="metric-form" style="padding:0"><label>Calories (optional estimate)<input id="meal-kcal" type="number" min="0" inputmode="numeric" placeholder="—"></label><label>Protein grams (optional estimate)<input id="meal-protein" type="number" min="0" inputmode="decimal" placeholder="—"></label></div><button class="primary" data-action="save-meal">Save meal note</button></div><div class="section-label">Today's journal · ${entries.length} entries</div>${entries.length?`<div class="tool-grid"><div class="tool-tile"><span>Logged energy · estimate</span><strong>${entries.reduce((n,e)=>n+(Number(e.kcal)||0),0)} <small>kcal</small></strong></div><div class="tool-tile"><span>Logged protein · estimate</span><strong>${entries.reduce((n,e)=>n+(Number(e.protein)||0),0)} <small>g</small></strong></div></div>`+entries.map(e=>`<div class="meal-entry"><strong>${escapeHtml(e.title)}</strong><div class="row-sub">${escapeHtml(e.description)}${e.note?' · '+escapeHtml(e.note):''}${e.kcal!==''&&e.kcal!=null?' · '+escapeHtml(e.kcal)+' kcal estimate':''}${e.protein!==''&&e.protein!=null?' · '+escapeHtml(e.protein)+' g protein estimate':''}</div></div>`).join(''):'<div class="history-empty">Your meal notes will appear here. No calorie target or food scoring.</div>'}<div class="inline-note">Optional calorie and protein fields are estimates you enter yourself, not targets. Food portions and nutrition vary; avoid treating estimates as exact or using them to restrict meals. A parent/guardian or registered dietitian can help with nutrition questions while you're growing.</div>`;
+    document.getElementById('fuel-content').innerHTML=`<div class="section-label">Quick meal check-ins</div><div class="tool-grid">${[['Breakfast','Home breakfast'],['Recess','School snack'],['Lunch','School lunch'],['Pre-training','After-school snack'],['Dinner','Family dinner']].map(([a,b])=>`<button class="tool-tile" data-action="quick-meal" data-meal="${a}"><span>＋ ${a}</span><strong style="font-size:13px">${b}</strong></button>`).join('')}</div><div class="section-label">Add food or drink</div><div class="meal-form"><label>What did you have?<textarea id="meal-description" placeholder="e.g. rice, sinigang, vegetables, water"></textarea></label><label>Optional note<input id="meal-note" placeholder="How energized did you feel?"></label><label>Extra note (optional)<input id="meal-note-detail" placeholder="e.g. had this before training"></label><button class="primary" data-action="save-meal">Save meal note</button></div><div class="section-label">Today's journal · ${entries.length} entries</div>${entries.length?entries.map(e=>`<div class="meal-entry"><strong>${escapeHtml(e.title)}</strong><div class="row-sub">${escapeHtml(e.description)}${e.note?' · '+escapeHtml(e.note):''}</div></div>`).join(''):'<div class="history-empty">Your meal notes will appear here. No calorie target or food scoring.</div>'}<div class="inline-note">Food entries are notes, not scores or targets. Eat regular, satisfying meals and snacks; a parent/guardian or registered dietitian can help with individualized nutrition questions.</div>`;
   }
   function renderCoach(){
-    const chat=data.coachChat||[]; document.getElementById('coach-content').innerHTML=`<div class="coach-chat">${chat.map(m=>`<div class="chat-bubble ${m.role}">${escapeHtml(m.text)}</div>`).join('')||'<div class="chat-bubble coach">I can help you navigate the routine, plan a shorter session, remember technique cues, and think through recovery. I work offline from built-in guidance; I am not a live AI or medical professional.</div>'}</div><div class="meal-form"><textarea id="coach-question" placeholder="Ask about today's workout…"></textarea><button class="primary" data-action="coach-send">Ask training guide</button></div><div class="section-label">Quick questions</div><div class="week-actions"><button class="secondary" data-action="coach-prompt" data-prompt="I only have 30 minutes today. How can I keep the session simple?">30-minute session</button><button class="secondary" data-action="coach-prompt" data-prompt="What should I focus on during warm-up and recovery?">Warm-up & recovery</button></div>`;
+    const chat=data.coachChat||[]; const live=!!(data.settings.coachEndpoint||'').trim(); document.getElementById('coach-content').innerHTML=`<div class="row" style="margin:12px 16px"><div class="row-title">${live?'Live AI coach configured':'Offline training guide'}</div><div class="row-sub">${live?'Messages go to your configured private backend. Do not include personal or sensitive information.':'Add the secure backend URL in Settings to enable Gemini. Until then, the built-in guide works offline.'}</div></div><div class="coach-chat">${chat.map(m=>`<div class="chat-bubble ${m.role}">${escapeHtml(m.text)}</div>`).join('')||'<div class="chat-bubble coach">I can help you navigate the routine, plan a shorter session, remember technique cues, and think through recovery. I work offline from built-in guidance; I am not a live AI or medical professional.</div>'}</div><div class="meal-form"><textarea id="coach-question" placeholder="Ask about today's workout…"></textarea><button class="primary" data-action="coach-send">${live?'Ask Gemini coach':'Ask offline guide'}</button></div><div class="section-label">Quick questions</div><div class="week-actions"><button class="secondary" data-action="coach-prompt" data-prompt="I only have 30 minutes today. How can I keep the session simple?">30-minute session</button><button class="secondary" data-action="coach-prompt" data-prompt="What should I focus on during warm-up and recovery?">Warm-up & recovery</button></div>`;
   }
   function coachReply(q){const t=q.toLowerCase();if(t.includes('30')||t.includes('time'))return 'Keep the warm-up, then choose the main strength movement and one accessory. Skip optional finishers rather than rushing or turning the session into a race. Resume the plan next time; do not double up.';if(t.includes('food')||t.includes('eat')||t.includes('meal'))return 'A practical meal can include familiar carbohydrates, a protein food, fruit or vegetables, and a drink. Eat enough to feel comfortably fueled. I cannot calculate a personal calorie target; ask a parent/guardian or registered dietitian for individualized advice.';if(t.includes('form')||t.includes('technique'))return 'Use a manageable load, smooth reps and a comfortable range. Ask a qualified coach to watch your technique. Stop if you feel pain, dizziness or unusual symptoms; camera cues are not a safety certification.';if(t.includes('stage')||t.includes('unlock'))return 'Use the stage criteria as guideposts, not deadlines. Build consistent, controlled practice first and have a qualified coach and parent/guardian help decide when to progress.';return 'For today, follow the listed order: warm-up, controlled primer if appropriate, main lifts, accessories/core, then gentle stretching. Keep the session comfortable and ask a qualified coach about unfamiliar movements.';}
   function showCue(name){document.getElementById('cue-title').textContent=name;document.getElementById('cue-copy').textContent=CUES[name]||CUES.default;document.getElementById('cue-video-link').href='https://www.youtube.com/results?search_query='+encodeURIComponent(name+' exercise tutorial form');document.getElementById('cue-modal').classList.add('open');}
   let fieldInterval=null;
   function updateFieldClock(){const ft=data.fieldTimer||{};const sec=ft.running&&ft.startedAt?ft.elapsed+Math.floor((Date.now()-ft.startedAt)/1000):ft.elapsed;const el=document.getElementById('field-clock');if(el)el.textContent=formatClock(sec);}
-  function saveMetrics(){const row={date:localDateKey(),timestamp:Date.now()};let has=false;['vertical','sprint','squat','bench','deadlift','bodyweight'].forEach(k=>{const v=document.getElementById('metric-'+k)?.value??'';row[k]=v===''?'':Number(v);if(v!=='')has=true;});if(!has){showToast('Add at least one measurement.');return;}data.performance.push(row);data.metricView=data.metricView||'sprint';save();renderProgress();showToast('Check-in saved.');}
-  function saveMeal(title,description,note='',kcal='',protein=''){if(!description.trim()){showToast('Add a short meal note first.');return;}data.mealLog.push({date:localDateKey(),time:new Date().toISOString(),title,description:description.trim(),note:note.trim(),kcal:kcal===''?'':Number(kcal),protein:protein===''?'':Number(protein)});save();renderFuel();showToast('Meal note saved.');}
+  function saveMetrics(){const row={date:localDateKey(),timestamp:Date.now()};let has=false;['vertical','sprint','squat','bench','deadlift'].forEach(k=>{const v=document.getElementById('metric-'+k)?.value??'';row[k]=v===''?'':Number(v);if(v!=='')has=true;});if(!has){showToast('Add at least one measurement.');return;}data.performance.push(row);data.metricView=data.metricView||'sprint';save();renderProgress();showToast('Check-in saved.');}
+  function saveMeal(title,description,note=''){if(!description.trim()){showToast('Add a short meal note first.');return;}data.mealLog.push({date:localDateKey(),time:new Date().toISOString(),title,description:description.trim(),note:note.trim()});save();renderFuel();showToast('Meal note saved.');}
 
   let cameraStream=null,poseTask=null,poseRAF=null;
+  let cameraCounter={movement:'squat',reps:0,phase:'Waiting',lastRepAt:0};
+  function resetCameraCounter(){
+    const movement=document.getElementById('camera-movement')?.value||cameraCounter.movement||'squat';
+    cameraCounter={movement,reps:0,phase:'Waiting',lastRepAt:0};
+    const reps=document.getElementById('camera-reps'),phase=document.getElementById('camera-phase'),cue=document.getElementById('camera-cue');
+    if(reps)reps.textContent='0';if(phase)phase.textContent='Waiting';
+    if(cue)cue.textContent=movement==='squat'?'Stand fully in frame, facing the camera. Use a comfortable bodyweight squat only.':'Set the phone to the side so shoulder, elbow and wrist are visible. Use a comfortable bodyweight push-up only.';
+  }
   async function startCamera(){
     const status=document.getElementById('camera-status');
     try{
       if(!navigator.mediaDevices?.getUserMedia)throw new Error('Camera access is unavailable in this browser.');
+      cameraCounter.movement=document.getElementById('camera-movement')?.value||'squat';
       cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
       const video=document.getElementById('camera-video');video.srcObject=cameraStream;await video.play();
-      status.textContent='Camera preview active. Loading optional pose landmarks…';
+      status.textContent='Camera preview active. Loading on-device pose model…';
       try{
         const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm');
         const fileset=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
         poseTask=await vision.PoseLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',delegate:'CPU'},runningMode:'VIDEO',numPoses:1});
-        status.textContent='Pose landmarks active. Use as a visual reference only; no automatic safety verdicts.';drawPose();
-      }catch(e){status.textContent='Camera preview works, but pose model could not load. Check internet and try again. No video is uploaded by this app.';}
+        status.textContent='Pose model ready. Counts are estimates only; no video is uploaded.';drawPose();
+      }catch(e){status.textContent='Camera preview works, but the pose model could not load. Check internet and try again. No video is uploaded by this app.';}
     }catch(e){status.textContent=e.message||'Could not start camera. Check browser permission and HTTPS.';}
   }
   function jointAngle(a,b,c){const ab={x:a.x-b.x,y:a.y-b.y},cb={x:c.x-b.x,y:c.y-b.y};const dot=ab.x*cb.x+ab.y*cb.y;const mag=Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y);return mag?Math.acos(Math.max(-1,Math.min(1,dot/mag)))*180/Math.PI:0;}
-  function drawPose(){const v=document.getElementById('camera-video'),c=document.getElementById('pose-canvas'),ctx=c.getContext('2d');if(!poseTask||!cameraStream)return; if(v.videoWidth){c.width=v.videoWidth;c.height=v.videoHeight;const res=poseTask.detectForVideo(v,performance.now());ctx.clearRect(0,0,c.width,c.height);const lm=res.landmarks?.[0];if(lm){const links=[[11,13],[13,15],[12,14],[14,16],[11,12],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];ctx.strokeStyle='#ff5500';ctx.lineWidth=Math.max(2,c.width*.004);links.forEach(([a,b])=>{if(lm[a]&&lm[b]){ctx.beginPath();ctx.moveTo(lm[a].x*c.width,lm[a].y*c.height);ctx.lineTo(lm[b].x*c.width,lm[b].y*c.height);ctx.stroke();}});ctx.fillStyle='#ffffff';lm.forEach(pt=>{ctx.beginPath();ctx.arc(pt.x*c.width,pt.y*c.height,Math.max(3,c.width*.004),0,Math.PI*2);ctx.fill();});const left=jointAngle(lm[23],lm[25],lm[27]);const right=jointAngle(lm[24],lm[26],lm[28]);const status=document.getElementById('camera-status');if(status)status.textContent=`Landmarks detected · estimated knee angles L ${Math.round(left)}° / R ${Math.round(right)}°. Camera angle, clothing and visibility affect accuracy; this is not a form verdict.`;}}poseRAF=requestAnimationFrame(drawPose);}
-  function stopCamera(){if(poseRAF)cancelAnimationFrame(poseRAF);poseRAF=null;poseTask?.close?.();poseTask=null;cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;const v=document.getElementById('camera-video');if(v)v.srcObject=null;const c=document.getElementById('pose-canvas');if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);}
+  function pointVisible(p){return !!p&&Number(p.visibility??1)>.55;}
+  function updateRepCounter(lm){
+    const movement=cameraCounter.movement;
+    let angle=null;
+    if(movement==='squat'){
+      const sides=[[23,25,27],[24,26,28]].filter(([a,b,c])=>[lm[a],lm[b],lm[c]].every(pointVisible));
+      if(sides.length)angle=sides.reduce((n,[a,b,c])=>n+jointAngle(lm[a],lm[b],lm[c]),0)/sides.length;
+    }else{
+      const sides=[[11,13,15],[12,14,16]].filter(([a,b,c])=>[lm[a],lm[b],lm[c]].every(pointVisible));
+      if(sides.length)angle=sides.reduce((n,[a,b,c])=>n+jointAngle(lm[a],lm[b],lm[c]),0)/sides.length;
+    }
+    if(angle===null){const cue=document.getElementById('camera-cue');if(cue)cue.textContent='Landmarks are not clear yet. Move the phone farther back and keep the relevant joints in frame.';return;}
+    const top=movement==='squat'?150:150,bottom=movement==='squat'?112:100;
+    const now=Date.now();let cueText='Move smoothly through a comfortable range.';
+    if(angle>top){
+      if(cameraCounter.phase==='Bottom'&&now-cameraCounter.lastRepAt>700){cameraCounter.reps++;cameraCounter.lastRepAt=now;cueText='Rep counted. Reset at the top and keep the next one controlled.';}
+      cameraCounter.phase='Top';
+    }else if(angle<bottom){
+      if(cameraCounter.phase==='Top'){cameraCounter.phase='Bottom';cueText='Bottom position detected. Return smoothly; do not force extra depth.';}
+      else if(cameraCounter.phase==='Waiting')cueText='Start from a comfortable upright/top position, then move smoothly.';
+      else cueText='Return smoothly; do not force extra depth.';
+    }else if(cameraCounter.phase==='Waiting'){cueText='Move to a comfortable start position to begin.';}
+    else cueText='Keep moving steadily; the counter is waiting for the next position.';
+    const reps=document.getElementById('camera-reps'),phase=document.getElementById('camera-phase'),cue=document.getElementById('camera-cue');
+    if(reps)reps.textContent=String(cameraCounter.reps);if(phase)phase.textContent=cameraCounter.phase;
+    if(cue)cue.textContent=cueText+' Estimated joint angle: '+Math.round(angle)+'°. This is not a form or safety assessment.';
+  }
+  function drawPose(){
+    const v=document.getElementById('camera-video'),c=document.getElementById('pose-canvas');
+    if(!poseTask||!cameraStream||!v||!c)return;
+    if(v.videoWidth){
+      c.width=v.videoWidth;c.height=v.videoHeight;const ctx=c.getContext('2d');
+      const res=poseTask.detectForVideo(v,performance.now());ctx.clearRect(0,0,c.width,c.height);
+      const lm=res.landmarks?.[0];
+      if(lm){
+        const links=[[11,13],[13,15],[12,14],[14,16],[11,12],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+        ctx.strokeStyle='#ff5500';ctx.lineWidth=Math.max(2,c.width*.004);
+        links.forEach(([a,b])=>{if(lm[a]&&lm[b]){ctx.beginPath();ctx.moveTo(lm[a].x*c.width,lm[a].y*c.height);ctx.lineTo(lm[b].x*c.width,lm[b].y*c.height);ctx.stroke();}});
+        ctx.fillStyle='#ffffff';lm.forEach(pt=>{ctx.beginPath();ctx.arc(pt.x*c.width,pt.y*c.height,Math.max(3,c.width*.004),0,Math.PI*2);ctx.fill();});
+        updateRepCounter(lm);
+        const status=document.getElementById('camera-status');if(status)status.textContent='On-device landmarks active · video stays in this browser. Counts can be inaccurate if joints are hidden or the camera angle changes.';
+      }
+    }
+    poseRAF=requestAnimationFrame(drawPose);
+  }
+  function stopCamera(){
+    if(poseRAF)cancelAnimationFrame(poseRAF);poseRAF=null;poseTask?.close?.();poseTask=null;
+    cameraStream?.getTracks().forEach(t=>t.stop());cameraStream=null;
+    const v=document.getElementById('camera-video');if(v)v.srcObject=null;
+    const c=document.getElementById('pose-canvas');if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);
+  }
+  let coachBusy=false;
+  async function sendCoachMessage(){
+    const input=document.getElementById('coach-question'),q=input?.value.trim();if(!q||coachBusy)return;
+    if(q.length>1000){showToast('Keep the question under 1,000 characters.');return;}
+    const endpoint=(data.settings.coachEndpoint||'').trim();
+    const history=(data.coachChat||[]).slice(-8);
+    data.coachChat.push({role:'user',text:q});data.coachChat=data.coachChat.slice(-24);save();renderCoach();
+    if(!endpoint){data.coachChat.push({role:'coach',text:coachReply(q)});data.coachChat=data.coachChat.slice(-24);save();renderCoach();return;}
+    coachBusy=true;
+    const btn=document.querySelector('[data-action="coach-send"]');if(btn){btn.disabled=true;btn.textContent='Thinking…';}
+    try{
+      const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),25000);
+      const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history,context:{stage:data.selectedStage||1,day:data.active?.day||data.rotationDay,workout:data.active?.title||todayRoutine().title,plan:todayRoutine().phases.map(p=>p.name+': '+p.exercises.map(e=>e.name).join(', ')).join(' | ').slice(0,1400)}}),signal:controller.signal});
+      clearTimeout(timeout);
+      const payload=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(payload.error||'The coach service is unavailable.');
+      if(typeof payload.reply!=='string'||!payload.reply.trim())throw new Error('The coach returned an empty response.');
+      data.coachChat.push({role:'coach',text:payload.reply.slice(0,4000)});
+    }catch(e){data.coachChat.push({role:'coach',text:(e.name==='AbortError'?'The coach took too long to respond.':'Could not reach the live coach: '+(e.message||'network error'))+' You can remove the backend URL in Settings to use the offline guide.'});}
+    finally{coachBusy=false;data.coachChat=data.coachChat.slice(-24);save();renderCoach();}
+  }
 
   function renderSettings() {
     document.getElementById('settings-content').innerHTML = `
@@ -728,7 +808,7 @@
       <div class="row"><div class="row-title">Current training stage</div><div class="row-sub">Stage ${data.selectedStage || 1}. Change stages in the Routines tab when readiness criteria are met.</div></div>
       <div class="row setting-row"><div class="copy"><span class="setting-name">Default rest timer</span><small>Used for new exercise timers; adjust each exercise during a workout.</small></div><select id="default-rest"><option value="60">1:00</option><option value="75">1:15</option><option value="90">1:30</option><option value="120">2:00</option><option value="150">2:30</option><option value="180">3:00</option></select></div>
       <div class="row setting-row"><div class="copy"><span class="setting-name">Rest-complete chime</span><small>Short tone when the rest timer reaches zero.</small></div><input id="chime-toggle" type="checkbox" ${data.settings.chime ? 'checked' : ''} aria-label="Enable rest chime"></div>
-      <div class="section-label">Camera movement guide</div>
+      <div class="section-label">Live AI coach connection</div><div class="row"><div class="row-title">Secure backend URL</div><div class="row-sub">Paste the HTTPS Worker endpoint supplied after the backend is deployed. The Gemini key stays on the server and is never stored here.</div><input id="coach-endpoint" type="url" inputmode="url" placeholder="https://your-worker.workers.dev/api/coach" value="${escapeHtml(data.settings.coachEndpoint||'')}" style="width:100%;margin-top:10px;padding:12px;background:#080808;border:1px solid var(--line);color:#fff"><button class="secondary" data-action="save-coach-endpoint" style="width:100%;margin-top:8px">Save coach URL</button></div><div class="section-label">Camera movement guide</div>
       <div class="row"><div class="row-title">On-device pose preview</div><div class="row-sub">Camera access requires permission and a compatible browser. Optional pose landmarks and rough joint-angle estimates can help you review alignment; they do not certify technique, automatically count valid reps, or replace an in-person coach. Initial model loading needs internet.</div><button class="secondary" style="width:100%;margin-top:10px" data-action="open-camera">Open camera form guide</button></div>
       <div class="section-label">JSON backup</div>
       <div class="row"><div class="row-title">Your data stays on this device</div><div class="row-sub">Export includes settings, active workout, exercise entries, and workout history. Store the JSON file somewhere safe.</div></div>
@@ -747,6 +827,7 @@
     document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', screen.id === `screen-${currentTab}`));
   }
   function switchTab(tab) {
+    if (tab !== 'today' && cameraStream) stopCamera();
     currentTab = tab;
     document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
     document.querySelectorAll('.screen').forEach(el => el.classList.toggle('active', el.id === `screen-${tab}`));
@@ -796,7 +877,9 @@
     else if (action === 'import') document.getElementById('import-file').click();
     else if (action === 'select-stage') {
       if (data.active) { showToast('Finish the active workout before changing stages.'); return; }
-      data.selectedStage = Math.min(3, Math.max(1, Number(button.dataset.stage)));
+      const requestedStage = Math.min(3, Math.max(1, Number(button.dataset.stage)));
+      if (requestedStage > 1 && !confirm('This stage includes more demanding strength and skill work. Only switch after the readiness checks, with a parent/guardian and qualified coach involved. Advanced gymnastics, tumbling and parkour must be supervised. Continue?')) return;
+      data.selectedStage = requestedStage;
       ROUTINES = STAGE_ROUTINES[data.selectedStage];
       data.rotationDay = 1;
       save(); renderAll(); showToast(`Stage ${data.selectedStage} selected.`);
@@ -826,18 +909,20 @@
     }
     else if (action === 'open-camera') document.getElementById('camera-modal').classList.add('open');
     else if (action === 'camera-start') startCamera();
+    else if (action === 'camera-reset') resetCameraCounter();
     else if (action === 'camera-stop') stopCamera();
     else if (action === 'camera-close') {stopCamera();document.getElementById('camera-modal').classList.remove('open');}
     else if (action === 'cue') showCue(button.dataset.name);
     else if (action === 'close-cue') document.getElementById('cue-modal').classList.remove('open');
     else if (action === 'save-metrics') saveMetrics();
-    else if (action === 'save-meal') saveMeal('Meal',document.getElementById('meal-description').value,document.getElementById('meal-note').value,document.getElementById('meal-kcal').value,document.getElementById('meal-protein').value);
+    else if (action === 'save-meal') saveMeal('Meal',document.getElementById('meal-description').value,document.getElementById('meal-note').value+' '+(document.getElementById('meal-note-detail')?.value||''));
     else if (action === 'quick-meal') saveMeal(button.dataset.meal,button.dataset.meal+' check-in','');
     else if (action === 'coach-prompt') { document.getElementById('coach-question').value=button.dataset.prompt; }
-    else if (action === 'coach-send') { const q=document.getElementById('coach-question').value.trim();if(!q)return;data.coachChat.push({role:'user',text:q},{role:'coach',text:coachReply(q)});data.coachChat=data.coachChat.slice(-24);save();renderCoach(); }
+    else if (action === 'coach-send') { sendCoachMessage(); }
+    else if (action === 'save-coach-endpoint') { const value=document.getElementById('coach-endpoint').value.trim();if(value){try{const u=new URL(value);if(u.protocol!=='https:'&&!['localhost','127.0.0.1'].includes(u.hostname))throw new Error();}catch(e){showToast('Enter a valid HTTPS backend URL.');return;}}data.settings.coachEndpoint=value;save();renderCoach();showToast(value?'Live coach URL saved on this device.':'Live coach disconnected.'); }
     else if (action === 'field-start') { const ft=data.fieldTimer||(data.fieldTimer={elapsed:0,startedAt:null,running:false,laps:[]});if(ft.running){ft.elapsed+=Math.floor((Date.now()-ft.startedAt)/1000);ft.running=false;ft.startedAt=null;}else{ft.startedAt=Date.now();ft.running=true;}save();renderToday(); }
-    else if (action === 'field-lap') { const ft=data.fieldTimer;if(ft?.running){const sec=ft.elapsed+Math.floor((Date.now()-ft.startedAt)/1000);ft.laps=ft.laps||[];ft.laps.push(sec);save();renderToday();} }
-    else if (action === 'field-reset') { data.fieldTimer={elapsed:0,startedAt:null,running:false,laps:[]};save();renderToday(); }
+    else if (action === 'field-lap') { const ft=data.fieldTimer;if(ft?.running){const total=ft.elapsed+Math.floor((Date.now()-ft.startedAt)/1000);const previous=ft.laps?.reduce((n,x)=>n+x,0)||0;ft.laps=ft.laps||[];ft.laps.push(Math.max(0,total-previous));save();renderToday();} }
+    else if (action === 'field-reset') { data.fieldTimer={elapsed:0,startedAt:null,running:false,laps:[],day:data.rotationDay};save();renderToday(); }
     else if (action === 'rest-complete') {
       data.rotationDay = 1; save(); renderAll(); showToast('Rest day complete. Day 1 is next.');
     }
@@ -852,6 +937,7 @@
     }
     else if (el.matches('[data-field]')) setValue(el.dataset.exercise, Number(el.dataset.set), el.dataset.field, el.value);
     else if (el.id === 'default-rest') { data.settings.defaultRest = Number(el.value); save(); showToast('Default rest updated.'); }
+    else if (el.id === 'camera-movement') { resetCameraCounter(); }
     else if (el.id === 'chime-toggle') { data.settings.chime = el.checked; save(); }
     else if (el.id === 'metric-view') { data.metricView=el.value;save();renderProgress(); }
   });
