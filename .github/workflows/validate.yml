@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/train-log-upgrade
+      - main
   workflow_dispatch:
 jobs:
   validate:
