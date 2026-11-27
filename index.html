@@ -155,8 +155,8 @@
     .chat-bubble.user{align-self:flex-end;border-color:#75402a}.chat-bubble.coach{align-self:flex-start}
     .meal-form{display:grid;gap:8px;padding:12px 16px}.meal-form textarea{min-height:76px;padding:10px;background:#080808;border:1px solid var(--line);color:white}
     .meal-entry{padding:12px 16px;border-top:1px solid var(--line);background:#101010}
-    .tabbar{grid-template-columns:repeat(7,1fr)}.tab{font-size:9px}.tab .tab-icon{font-size:16px}
-    @media(max-width:380px){.tab{font-size:8px}.tab .tab-icon{font-size:14px}.tabbar{padding-left:1px;padding-right:1px}}
+    .tabbar{display:flex;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;gap:2px;padding-left:6px;padding-right:6px}.tabbar::-webkit-scrollbar{display:none}.tab{flex:0 0 64px;font-size:9px}.tab .tab-icon{font-size:16px}
+    @media(max-width:380px){.tab{flex-basis:58px;font-size:8px}.tab .tab-icon{font-size:14px}}
 
     @media (min-width: 720px) {
       .app { max-width: 620px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
@@ -679,10 +679,11 @@
   };
   function fieldToolsHtml(day){
     const isRun = day === 6;
+    if (data.fieldTimer?.day !== day) data.fieldTimer = { elapsed:0, startedAt:null, running:false, laps:[], day };
     return `<div class="section-label">Field stopwatch</div><div class="stopwatch"><div class="eyebrow">${isRun?'RUN / WALK TIMER':'SPRINT SPLIT TIMER'}</div><div class="stopwatch-time" id="field-clock">${formatClock(data.fieldTimer?.elapsed||0)}</div><div class="row-sub">${isRun?'Track your 25–35 minute easy session.':'Tap Start at the start line and Stop at the finish. Use a coach or training partner for timing when possible.'}</div><div class="stopwatch-actions"><button class="primary" data-action="field-start">${data.fieldTimer?.running?'Stop':'Start'}</button><button data-action="field-lap">Lap</button><button data-action="field-reset">Reset</button></div><div id="field-laps" class="row-sub">${(data.fieldTimer?.laps||[]).map((v,i)=>`Lap ${i+1}: ${formatClock(v)}`).join(' · ')}</div></div>`;
   }
   function renderProgress(){
-    const list=data.performance||[]; const metrics=[['vertical','Vertical jump','cm'],['sprint','40m time','s'],['squat','Squat','kg'],['bench','Bench','kg'],['deadlift','Deadlift','kg'],['bodyweight','Bodyweight','kg']];
+    const list=data.performance||[]; const metrics=[['vertical','Vertical jump','cm'],['sprint','40m time','s'],['squat','Squat','kg'],['bench','Bench','kg'],['deadlift','Deadlift','kg']];
     const latest=k=>[...list].reverse().find(x=>x[k]!==''&&x[k]!=null)?.[k];
     const metricCards=metrics.map(([k,n,u])=>`<div class="tool-tile"><span>${n}</span><strong>${latest(k)!=null?escapeHtml(latest(k))+' <small>'+u+'</small>':'—'}</strong></div>`).join('');
     const selected=metrics.find(m=>m[0]===data.metricView)?.[0]||'sprint'; const vals=list.filter(x=>x[selected]!==''&&x[selected]!=null).slice(-8); const max=Math.max(1,...vals.map(x=>Number(x[selected]))), min=Math.min(0,...vals.map(x=>Number(x[selected]))); const points=vals.map((x,i)=>`${vals.length<2?50:i*100/(vals.length-1)},${130-(Number(x[selected])-min)/(max-min||1)*110}`).join(' ');
@@ -690,7 +691,7 @@
   }
   function renderFuel(){
     const entries=(data.mealLog||[]).filter(x=>x.date===localDateKey());
-    document.getElementById('fuel-content').innerHTML=`<div class="section-label">Quick meal check-ins</div><div class="tool-grid">${[['Breakfast','Home breakfast'],['Recess','School snack'],['Lunch','School lunch'],['Pre-training','After-school snack'],['Dinner','Family dinner']].map(([a,b])=>`<button class="tool-tile" data-action="quick-meal" data-meal="${a}"><span>＋ ${a}</span><strong style="font-size:13px">${b}</strong></button>`).join('')}</div><div class="section-label">Add food or drink</div><div class="meal-form"><label>What did you have?<textarea id="meal-description" placeholder="e.g. rice, sinigang, vegetables, water"></textarea></label><label>Optional note<input id="meal-note" placeholder="How energized did you feel?"></label><div class="metric-form" style="padding:0"><label>Calories (optional estimate)<input id="meal-kcal" type="number" min="0" inputmode="numeric" placeholder="—"></label><label>Protein grams (optional estimate)<input id="meal-protein" type="number" min="0" inputmode="decimal" placeholder="—"></label></div><button class="primary" data-action="save-meal">Save meal note</button></div><div class="section-label">Today's journal · ${entries.length} entries</div>${entries.length?`<div class="tool-grid"><div class="tool-tile"><span>Logged energy · estimate</span><strong>${entries.reduce((n,e)=>n+(Number(e.kcal)||0),0)} <small>kcal</small></strong></div><div class="tool-tile"><span>Logged protein · estimate</span><strong>${entries.reduce((n,e)=>n+(Number(e.protein)||0),0)} <small>g</small></strong></div></div>`+entries.map(e=>`<div class="meal-entry"><strong>${escapeHtml(e.title)}</strong><div class="row-sub">${escapeHtml(e.description)}${e.note?' · '+escapeHtml(e.note):''}${e.kcal!==''&&e.kcal!=null?' · '+escapeHtml(e.kcal)+' kcal estimate':''}${e.protein!==''&&e.protein!=null?' · '+escapeHtml(e.protein)+' g protein estimate':''}</div></div>`).join(''):'<div class="history-empty">Your meal notes will appear here. No calorie target or food scoring.</div>'}<div class="inline-note">Optional calorie and protein fields are estimates you enter yourself, not targets. Food portions and nutrition vary; avoid treating estimates as exact or using them to restrict meals. A parent/guardian or registered dietitian can help with nutrition questions while you're growing.</div>`;
+    document.getElementById('fuel-content').innerHTML=`<div class="section-label">Quick meal check-ins</div><div class="tool-grid">${[['Breakfast','Home breakfast'],['Recess','School snack'],['Lunch','School lunch'],['Pre-training','After-school snack'],['Dinner','Family dinner']].map(([a,b])=>`<button class="tool-tile" data-action="quick-meal" data-meal="${a}"><span>＋ ${a}</span><strong style="font-size:13px">${b}</strong></button>`).join('')}</div><div class="section-label">Add food or drink</div><div class="meal-form"><label>What did you have?<textarea id="meal-description" placeholder="e.g. rice, sinigang, vegetables, water"></textarea></label><label>Optional note<input id="meal-note" placeholder="How energized did you feel?"></label><label>Extra note (optional)<input id="meal-note-detail" placeholder="e.g. had this before training"></label><button class="primary" data-action="save-meal">Save meal note</button></div><div class="section-label">Today's journal · ${entries.length} entries</div>${entries.length?entries.map(e=>`<div class="meal-entry"><strong>${escapeHtml(e.title)}</strong><div class="row-sub">${escapeHtml(e.description)}${e.note?' · '+escapeHtml(e.note):''}</div></div>`).join(''):'<div class="history-empty">Your meal notes will appear here. No calorie target or food scoring.</div>'}<div class="inline-note">Food entries are notes, not scores or targets. Eat regular, satisfying meals and snacks; a parent/guardian or registered dietitian can help with individualized nutrition questions.</div>`;
   }
   function renderCoach(){
     const chat=data.coachChat||[]; document.getElementById('coach-content').innerHTML=`<div class="coach-chat">${chat.map(m=>`<div class="chat-bubble ${m.role}">${escapeHtml(m.text)}</div>`).join('')||'<div class="chat-bubble coach">I can help you navigate the routine, plan a shorter session, remember technique cues, and think through recovery. I work offline from built-in guidance; I am not a live AI or medical professional.</div>'}</div><div class="meal-form"><textarea id="coach-question" placeholder="Ask about today's workout…"></textarea><button class="primary" data-action="coach-send">Ask training guide</button></div><div class="section-label">Quick questions</div><div class="week-actions"><button class="secondary" data-action="coach-prompt" data-prompt="I only have 30 minutes today. How can I keep the session simple?">30-minute session</button><button class="secondary" data-action="coach-prompt" data-prompt="What should I focus on during warm-up and recovery?">Warm-up & recovery</button></div>`;
@@ -699,8 +700,8 @@
   function showCue(name){document.getElementById('cue-title').textContent=name;document.getElementById('cue-copy').textContent=CUES[name]||CUES.default;document.getElementById('cue-video-link').href='https://www.youtube.com/results?search_query='+encodeURIComponent(name+' exercise tutorial form');document.getElementById('cue-modal').classList.add('open');}
   let fieldInterval=null;
   function updateFieldClock(){const ft=data.fieldTimer||{};const sec=ft.running&&ft.startedAt?ft.elapsed+Math.floor((Date.now()-ft.startedAt)/1000):ft.elapsed;const el=document.getElementById('field-clock');if(el)el.textContent=formatClock(sec);}
-  function saveMetrics(){const row={date:localDateKey(),timestamp:Date.now()};let has=false;['vertical','sprint','squat','bench','deadlift','bodyweight'].forEach(k=>{const v=document.getElementById('metric-'+k)?.value??'';row[k]=v===''?'':Number(v);if(v!=='')has=true;});if(!has){showToast('Add at least one measurement.');return;}data.performance.push(row);data.metricView=data.metricView||'sprint';save();renderProgress();showToast('Check-in saved.');}
-  function saveMeal(title,description,note='',kcal='',protein=''){if(!description.trim()){showToast('Add a short meal note first.');return;}data.mealLog.push({date:localDateKey(),time:new Date().toISOString(),title,description:description.trim(),note:note.trim(),kcal:kcal===''?'':Number(kcal),protein:protein===''?'':Number(protein)});save();renderFuel();showToast('Meal note saved.');}
+  function saveMetrics(){const row={date:localDateKey(),timestamp:Date.now()};let has=false;['vertical','sprint','squat','bench','deadlift'].forEach(k=>{const v=document.getElementById('metric-'+k)?.value??'';row[k]=v===''?'':Number(v);if(v!=='')has=true;});if(!has){showToast('Add at least one measurement.');return;}data.performance.push(row);data.metricView=data.metricView||'sprint';save();renderProgress();showToast('Check-in saved.');}
+  function saveMeal(title,description,note=''){if(!description.trim()){showToast('Add a short meal note first.');return;}data.mealLog.push({date:localDateKey(),time:new Date().toISOString(),title,description:description.trim(),note:note.trim()});save();renderFuel();showToast('Meal note saved.');}
 
   let cameraStream=null,poseTask=null,poseRAF=null;
   async function startCamera(){
@@ -747,6 +748,7 @@
     document.querySelectorAll('.screen').forEach(screen => screen.classList.toggle('active', screen.id === `screen-${currentTab}`));
   }
   function switchTab(tab) {
+    if (tab !== 'today' && cameraStream) stopCamera();
     currentTab = tab;
     document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
     document.querySelectorAll('.screen').forEach(el => el.classList.toggle('active', el.id === `screen-${tab}`));
@@ -796,7 +798,9 @@
     else if (action === 'import') document.getElementById('import-file').click();
     else if (action === 'select-stage') {
       if (data.active) { showToast('Finish the active workout before changing stages.'); return; }
-      data.selectedStage = Math.min(3, Math.max(1, Number(button.dataset.stage)));
+      const requestedStage = Math.min(3, Math.max(1, Number(button.dataset.stage)));
+      if (requestedStage > 1 && !confirm('This stage includes more demanding strength and skill work. Only switch after the readiness checks, with a parent/guardian and qualified coach involved. Advanced gymnastics, tumbling and parkour must be supervised. Continue?')) return;
+      data.selectedStage = requestedStage;
       ROUTINES = STAGE_ROUTINES[data.selectedStage];
       data.rotationDay = 1;
       save(); renderAll(); showToast(`Stage ${data.selectedStage} selected.`);
@@ -831,13 +835,13 @@
     else if (action === 'cue') showCue(button.dataset.name);
     else if (action === 'close-cue') document.getElementById('cue-modal').classList.remove('open');
     else if (action === 'save-metrics') saveMetrics();
-    else if (action === 'save-meal') saveMeal('Meal',document.getElementById('meal-description').value,document.getElementById('meal-note').value,document.getElementById('meal-kcal').value,document.getElementById('meal-protein').value);
+    else if (action === 'save-meal') saveMeal('Meal',document.getElementById('meal-description').value,document.getElementById('meal-note').value+' '+(document.getElementById('meal-note-detail')?.value||''));
     else if (action === 'quick-meal') saveMeal(button.dataset.meal,button.dataset.meal+' check-in','');
     else if (action === 'coach-prompt') { document.getElementById('coach-question').value=button.dataset.prompt; }
     else if (action === 'coach-send') { const q=document.getElementById('coach-question').value.trim();if(!q)return;data.coachChat.push({role:'user',text:q},{role:'coach',text:coachReply(q)});data.coachChat=data.coachChat.slice(-24);save();renderCoach(); }
     else if (action === 'field-start') { const ft=data.fieldTimer||(data.fieldTimer={elapsed:0,startedAt:null,running:false,laps:[]});if(ft.running){ft.elapsed+=Math.floor((Date.now()-ft.startedAt)/1000);ft.running=false;ft.startedAt=null;}else{ft.startedAt=Date.now();ft.running=true;}save();renderToday(); }
-    else if (action === 'field-lap') { const ft=data.fieldTimer;if(ft?.running){const sec=ft.elapsed+Math.floor((Date.now()-ft.startedAt)/1000);ft.laps=ft.laps||[];ft.laps.push(sec);save();renderToday();} }
-    else if (action === 'field-reset') { data.fieldTimer={elapsed:0,startedAt:null,running:false,laps:[]};save();renderToday(); }
+    else if (action === 'field-lap') { const ft=data.fieldTimer;if(ft?.running){const total=ft.elapsed+Math.floor((Date.now()-ft.startedAt)/1000);const previous=ft.laps?.reduce((n,x)=>n+x,0)||0;ft.laps=ft.laps||[];ft.laps.push(Math.max(0,total-previous));save();renderToday();} }
+    else if (action === 'field-reset') { data.fieldTimer={elapsed:0,startedAt:null,running:false,laps:[],day:data.rotationDay};save();renderToday(); }
     else if (action === 'rest-complete') {
       data.rotationDay = 1; save(); renderAll(); showToast('Rest day complete. Day 1 is next.');
     }
