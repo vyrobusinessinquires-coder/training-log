@@ -185,158 +185,117 @@
   'use strict';
   const STORAGE_KEY = 'train-log-data-v1';
   const DAY_NAMES = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
-  const ROUTINES = [
-    {
-      id: 1, title: 'Squat, Bounce & Legs', location: 'Anytime Fitness',
-      phases: [
-        { name: 'Warm-up', note: '7 min · move easily and prepare the joints', exercises: [
-          ex('Ankle circles', 1, 10, 'reps', { detail: 'Each side', weighted: false, rest: 20 }),
-          ex('Leg swings', 1, 10, 'reps', { detail: 'Front and side · each leg', weighted: false, rest: 20 }),
-          ex('Bodyweight squats', 1, 10, 'reps', { weighted: false, rest: 30 }),
-          ex('Squat warm-up sets', 2, 5, 'reps', { detail: 'Start very light; technique first', weighted: true, rest: 45 })
-        ]},
-        { name: 'Explosive primer', note: 'Low volume · controlled, quiet landings', exercises: [
-          ex('Ankle pogo hops', 3, 12, 'reps', { weighted: false, rest: 45 }),
-          ex('Squat jumps', 3, 4, 'reps', { detail: 'Soft, quiet landings; stop if form slips', weighted: false, rest: 90 })
-        ]},
-        { name: 'Main strength', note: 'Keep about 2 good reps in reserve; no max attempts', exercises: [
-          ex('Barbell back squat', 4, 5, 'reps', { range: '5–6 reps', weighted: true, rest: 150 })
-        ]},
-        { name: 'Accessories', note: 'Smooth reps; use a load you can control', exercises: [
-          ex('Romanian deadlift', 3, 8, 'reps', { weighted: true, rest: 90 }),
-          ex('Leg press', 3, 10, 'reps', { weighted: true, rest: 90 })
-        ]},
-        { name: 'Stretching · last', note: 'Gentle range only; never force a stretch', exercises: [
-          ex('ATG split squat', 2, 8, 'reps', { detail: 'Each leg · slow and comfortable', weighted: false, rest: 30 }),
-          ex('Couch stretch', 1, 45, 'seconds', { detail: 'Each side', weighted: false, rest: 15 })
-        ]}
-      ]
-    },
-    {
-      id: 2, title: 'Speed, Gymnastics & Splits', location: 'Camp Aguinaldo',
-      phases: [
-        { name: 'Warm-up', note: '8 min · build speed gradually', exercises: [
-          ex('Easy jog', 1, 3, 'minutes', { weighted: false, rest: 20 }),
-          ex('High knees', 1, 10, 'reps', { weighted: false, rest: 20 }),
-          ex('Butt kicks', 1, 10, 'reps', { weighted: false, rest: 20 }),
-          ex('Walking lunges with torso turn', 1, 10, 'reps', { detail: 'Total steps', weighted: false, rest: 30 }),
-          ex('Build-up strides', 2, 1, 'reps', { detail: 'Gradual pace, not an all-out sprint', weighted: false, rest: 45 })
-        ]},
-        { name: 'Speed work', note: 'Fast but controlled; full recovery between runs', exercises: [
-          ex('40 m controlled runs', 5, 40, 'meters', { detail: 'Run smoothly; walk back and recover', weighted: false, rest: 120 })
-        ]},
-        { name: 'Gymnastics skill practice', note: '20 min · coach-supervised only', exercises: [
-          ex('Foundational gymnastics skills', 1, 20, 'minutes', { detail: 'Qualified coach, suitable mats, and spotting; skip advanced flips when unsupervised', weighted: false, rest: 0, noSets: true })
-        ]},
-        { name: 'Stretching · last', note: 'Only move into a comfortable range; no pushing through pain', exercises: [
-          ex('Front split mobility hold', 1, 60, 'seconds', { detail: 'Each leg · supported, comfortable range', weighted: false, rest: 20 }),
-          ex('Seated pancake stretch', 2, 45, 'seconds', { weighted: false, rest: 20 }),
-          ex('Butterfly groin stretch', 1, 45, 'seconds', { weighted: false, rest: 20 })
-        ]}
-      ]
-    },
-    {
-      id: 3, title: 'Bench, Push & Core', location: 'Anytime Fitness',
-      phases: [
-        { name: 'Warm-up', note: '7 min · prepare shoulders and wrists', exercises: [
-          ex('Wrist circles and palm pulses', 1, 15, 'reps', { weighted: false, rest: 20 }),
-          ex('Band pull-aparts / arm circles', 1, 15, 'reps', { weighted: false, rest: 20 }),
-          ex('Scapular push-ups', 1, 10, 'reps', { weighted: false, rest: 30 }),
-          ex('Bench press warm-up sets', 2, 5, 'reps', { detail: 'Very light preparation sets', weighted: true, rest: 45 })
-        ]},
-        { name: 'Explosive primer', note: 'Fast intent, but maintain control', exercises: [
-          ex('Incline speed push-ups', 3, 5, 'reps', { detail: 'Use a stable surface; no need to clap', weighted: false, rest: 60 })
-        ]},
-        { name: 'Main strength', note: 'Leave about 2 good reps in reserve', exercises: [
-          ex('Barbell bench press', 4, 5, 'reps', { range: '5–6 reps', weighted: true, rest: 150 }),
-          ex('Feet-elevated pike push-ups', 3, 6, 'reps', { range: '6–8 reps', detail: 'Use a stable setup and controlled range', weighted: false, rest: 90 })
-        ]},
-        { name: 'Accessories & core', note: 'Stop sets before technique breaks down', exercises: [
-          ex('Parallel bar dips', 3, 8, 'reps', { range: '8–10 reps', weighted: false, rest: 90 }),
-          ex('Dumbbell lateral raises', 4, 12, 'reps', { range: '12–15 reps', weighted: true, rest: 60 }),
-          ex('L-sit support hold', 3, 15, 'seconds', { weighted: false, rest: 45 }),
-          ex('Hanging knee raises', 3, 8, 'reps', { detail: 'Controlled variation in place of toes-to-bar', weighted: false, rest: 60 })
-        ]},
-        { name: 'Stretching · last', note: 'Gentle stretch, no joint pain', exercises: [
-          ex('Chest doorway stretch', 1, 45, 'seconds', { detail: 'Each side', weighted: false, rest: 15 }),
-          ex('Overhead triceps / lat stretch', 1, 45, 'seconds', { detail: 'Each side', weighted: false, rest: 15 })
-        ]}
-      ]
-    },
-    {
-      id: 4, title: 'Deadlift, Pull & Grip', location: 'Anytime Fitness',
-      phases: [
-        { name: 'Warm-up', note: '7 min · prepare hips, back and shoulders', exercises: [
-          ex('Comfortable dead hang', 1, 30, 'seconds', { weighted: false, rest: 20 }),
-          ex('Scapular pull-ups', 1, 10, 'reps', { weighted: false, rest: 30 }),
-          ex('Hip hinges with empty bar', 1, 10, 'reps', { weighted: false, rest: 30 }),
-          ex('Deadlift warm-up sets', 2, 5, 'reps', { detail: 'Light preparation sets', weighted: true, rest: 45 })
-        ]},
-        { name: 'Main strength', note: 'Brace, move smoothly, and keep about 2 reps in reserve', exercises: [
-          ex('Deadlift', 3, 5, 'reps', { range: '5–6 reps', weighted: true, rest: 180 }),
-          ex('Assisted pull-ups', 4, 5, 'reps', { range: '5–8 reps', detail: 'Controlled reps; use assistance as needed', weighted: false, rest: 120 })
-        ]},
-        { name: 'Back & grip accessories', note: 'Grip work should not compromise safe control', exercises: [
-          ex('Barbell / chest-supported row', 3, 8, 'reps', { range: '8–10 reps', weighted: true, rest: 90 }),
-          ex('Hammer curls', 3, 8, 'reps', { range: '8–10 reps', weighted: true, rest: 60 }),
-          ex('Towel / bar dead hang', 3, 20, 'seconds', { detail: 'Comfortable hold; stop before grip fails', weighted: false, rest: 60 })
-        ]},
-        { name: 'Stamina finisher', note: 'Moderate intervals, not all-out efforts', exercises: [
-          ex('Bike / rower intervals', 8, 20, 'seconds', { detail: '20 sec brisk + 40 sec easy; repeat 8 rounds', weighted: false, rest: 40 })
-        ]},
-        { name: 'Stretching · last', note: 'Relaxed breathing; gentle range', exercises: [
-          ex('Lat stretch / child’s pose', 1, 60, 'seconds', { weighted: false, rest: 15 }),
-          ex('Forearm flexor / extensor stretch', 1, 30, 'seconds', { detail: 'Each side', weighted: false, rest: 15 })
-        ]}
-      ]
-    },
-    {
-      id: 5, title: 'Single-Leg Strength & Control', location: 'Anytime Fitness',
-      phases: [
-        { name: 'Warm-up', note: '6 min · comfortable mobility', exercises: [
-          ex('Hip 90/90 switches', 1, 10, 'reps', { weighted: false, rest: 20 }),
-          ex('Bodyweight reverse lunges', 1, 10, 'reps', { weighted: false, rest: 20 }),
-          ex('Band pull-aparts', 1, 15, 'reps', { weighted: false, rest: 30 })
-        ]},
-        { name: 'Explosive primer', note: 'Use a low, stable step and supervision', exercises: [
-          ex('Low step-up drive', 3, 4, 'reps', { detail: 'Each leg · controlled, no high box jumps', weighted: false, rest: 90 })
-        ]},
-        { name: 'Main strength', note: 'Smooth tempo; no forced reps', exercises: [
-          ex('Bulgarian split squat', 3, 8, 'reps', { detail: 'Each leg', weighted: true, rest: 90 }),
-          ex('Archer push-up / incline dumbbell press', 3, 6, 'reps', { range: '6–8 reps', detail: 'Choose the controlled variation', weighted: true, rest: 90 })
-        ]},
-        { name: 'Mobility & control', note: 'Advanced shoulder/spine skills require qualified coaching', exercises: [
-          ex('Shoulder mobility practice', 1, 8, 'reps', { detail: 'Coach-guided, pain-free range; skip advanced hangs if unsupervised', weighted: false, rest: 45 }),
-          ex('Unloaded hip-hinge mobility', 2, 8, 'reps', { detail: 'Slow and comfortable; no loaded deep spinal curls', weighted: false, rest: 45 })
-        ]},
-        { name: 'Stretching · last', note: 'Do not force deep back bends', exercises: [
-          ex('Supported bridge preparation', 3, 15, 'seconds', { detail: 'Coach-supervised only; use a comfortable alternative', weighted: false, rest: 45 }),
-          ex('Deep squat hold', 1, 45, 'seconds', { detail: 'Supported if needed', weighted: false, rest: 20 })
-        ]}
-      ]
-    },
-    {
-      id: 6, title: 'Stamina & Movement Flow', location: 'Camp Aguinaldo',
-      phases: [
-        { name: 'Warm-up', note: '5 min · gradually increase movement', exercises: [
-          ex('Brisk walk', 1, 3, 'minutes', { weighted: false, rest: 15 }),
-          ex('Ankle bounces', 1, 10, 'reps', { weighted: false, rest: 15 }),
-          ex('Hip circles', 1, 10, 'reps', { weighted: false, rest: 15 })
-        ]},
-        { name: 'Steady stamina', note: 'Conversational pace; reduce pace or stop if uncomfortable', exercises: [
-          ex('Zone 2 jog / brisk walk', 1, 30, 'minutes', { detail: '30–35 min at a pace where conversation is possible', weighted: false, rest: 0 })
-        ]},
-        { name: 'Movement flow', note: '15 min · stay low and use a safe, clear area', exercises: [
-          ex('Low-level movement circuit', 1, 15, 'minutes', { detail: 'Floor-level balance, bear crawl and crab walk; jumps only with coaching and a safe landing area', weighted: false, rest: 0 })
-        ]},
-        { name: 'Stretching · last', note: 'Relaxed range, never bounce into a stretch', exercises: [
-          ex('Standing hamstring stretch', 1, 45, 'seconds', { weighted: false, rest: 15 }),
-          ex('Hip flexor lunge stretch', 1, 45, 'seconds', { detail: 'Each side', weighted: false, rest: 15 })
-        ]}
-      ]
-    },
-    { id: 7, title: 'Full Rest', location: 'Recovery', restDay: true, phases: [] }
-  ];
+
+  function makeDay(id, title, location, phases, restDay=false) {
+    return { id, title, location, phases, restDay };
+  }
+  const STAGE_ROUTINES = {
+    1: [
+      makeDay(1,'Legs & Bounce','Anytime Fitness',[
+        {name:'Warm-up',note:'Easy joint preparation',exercises:[ex('Ankle circles',1,10,'reps',{detail:'Each direction / side',weighted:false,rest:15}),ex('Leg swings',1,10,'reps',{detail:'Front and side · each leg',weighted:false,rest:15}),ex('Bodyweight squats',1,10,'reps',{weighted:false,rest:30})]},
+        {name:'Explosive primer',note:'Light effort; quiet, balanced landings',exercises:[ex('Ankle pogo hops',3,10,'reps',{weighted:false,rest:45}),ex('Squat jumps',3,4,'reps',{detail:'Only if landing mechanics are comfortable; otherwise practice controlled squats',weighted:false,rest:75})]},
+        {name:'Strength',note:'Technique first; use manageable resistance with supervision',exercises:[ex('Goblet squat / light barbell squat',4,6,'reps',{range:'6–8 reps',weighted:true,rest:90}),ex('Dumbbell Romanian deadlift',3,8,'reps',{weighted:true,rest:90}),ex('Leg press',3,10,'reps',{weighted:true,rest:90})]},
+        {name:'Stretching · last',note:'Comfortable range only',exercises:[ex('Assisted ATG split squat',2,6,'reps',{detail:'Each leg · hold rack for balance',weighted:false,rest:30}),ex('Couch stretch',1,30,'seconds',{detail:'Each side',weighted:false,rest:15})]}
+      ]),
+      makeDay(2,'Speed, Grass Basics & Mobility','Camp Aguinaldo',[
+        {name:'Warm-up',note:'Build up gradually',exercises:[ex('Light jog',1,3,'minutes',{weighted:false,rest:15}),ex('High knees',1,10,'reps',{weighted:false,rest:15}),ex('Butt kicks',1,10,'reps',{weighted:false,rest:15}),ex('Walking lunges',1,10,'reps',{detail:'Total steps',weighted:false,rest:30})]},
+        {name:'Speed',note:'Controlled strides, not all-out sprints',exercises:[ex('40 m strides',4,40,'meters',{detail:'About 75% effort · rest 2 min',weighted:false,rest:120})]},
+        {name:'Grass basics',note:'Use a clear, suitable surface; rolling skills only with a qualified coach',exercises:[ex('High plank hold',3,30,'seconds',{weighted:false,rest:45}),ex('Forward / backward somersault roll practice',1,1,'coach-led',{detail:'Coach-supervised on suitable mats; do not attempt unsupervised',weighted:false,rest:0,noSets:true})]},
+        {name:'Stretching · last',note:'Gentle mobility',exercises:[ex('Half-kneeling hip stretch',1,45,'seconds',{detail:'Each leg',weighted:false,rest:15}),ex('Seated straddle reach',2,30,'seconds',{weighted:false,rest:20})]}
+      ]),
+      makeDay(3,'Push & Core','Anytime Fitness',[
+        {name:'Warm-up',note:'Prepare wrists and shoulders',exercises:[ex('Wrist circles',1,10,'reps',{weighted:false,rest:10}),ex('Arm circles',1,10,'reps',{weighted:false,rest:10}),ex('Wall push-ups',1,10,'reps',{weighted:false,rest:30})]},
+        {name:'Explosive primer',note:'Use a high, stable bench; stop if wrists or shoulders hurt',exercises:[ex('Incline plyometric push-ups',3,5,'reps',{weighted:false,rest:60})]},
+        {name:'Strength',note:'Controlled reps; leave a few comfortable reps in reserve',exercises:[ex('Barbell / dumbbell bench press',4,6,'reps',{range:'6–8 reps',weighted:true,rest:120}),ex('Seated dumbbell shoulder press',3,8,'reps',{weighted:true,rest:90}),ex('Bench dips',3,8,'reps',{range:'8–10 reps',detail:'Feet on floor; use pain-free range or substitute cable press-down',weighted:false,rest:75})]},
+        {name:'Accessories & core',note:'Smooth, controlled movement',exercises:[ex('Dumbbell lateral raises',3,12,'reps',{weighted:true,rest:60}),ex('Hanging knee raises / captain’s chair',3,8,'reps',{weighted:false,rest:60})]},
+        {name:'Stretching · last',note:'Gentle stretch',exercises:[ex('Doorway chest stretch',1,30,'seconds',{detail:'Each side',weighted:false,rest:15})]}
+      ]),
+      makeDay(4,'Pull, Grip & Stamina','Anytime Fitness',[
+        {name:'Warm-up',note:'Use comfortable range',exercises:[ex('Supported dead hang',1,15,'seconds',{detail:'Only if comfortable and supervised',weighted:false,rest:20}),ex('Scapular shrugs on bar',1,10,'reps',{weighted:false,rest:30}),ex('Empty-bar hip hinges',1,10,'reps',{weighted:false,rest:30})]},
+        {name:'Strength',note:'Light-to-moderate resistance; coach checks technique',exercises:[ex('Trap-bar / light barbell deadlift',3,6,'reps',{weighted:true,rest:120}),ex('Lat pulldown machine',4,8,'reps',{weighted:true,rest:90}),ex('Chest-supported machine row',3,10,'reps',{weighted:true,rest:90})]},
+        {name:'Accessories & grip',note:'Stop before grip or form breaks down',exercises:[ex('Dumbbell hammer curls',3,10,'reps',{weighted:true,rest:60}),ex('Bar dead hang',3,20,'seconds',{detail:'Comfortable hold; supervised',weighted:false,rest:60})]},
+        {name:'Stamina',note:'Moderate intervals, not all-out',exercises:[ex('Stationary bike intervals',6,20,'seconds',{detail:'20 sec brisk / 40 sec easy',weighted:false,rest:40})]},
+        {name:'Stretching · last',note:'Relaxed breathing',exercises:[ex('Child’s pose lat stretch',1,45,'seconds',{weighted:false,rest:15})]}
+      ]),
+      makeDay(5,'Single-Leg & Spine','Anytime Fitness',[
+        {name:'Warm-up',note:'Comfortable mobility',exercises:[ex('Hip 90/90 switches',1,10,'reps',{weighted:false,rest:20}),ex('Bodyweight reverse lunges',1,10,'reps',{weighted:false,rest:30})]},
+        {name:'Explosive primer',note:'Low stable step; no jump',exercises:[ex('Fast step-ups',3,5,'reps',{detail:'Each leg · drive knee up, controlled descent',weighted:false,rest:60})]},
+        {name:'Strength',note:'Balanced, controlled reps',exercises:[ex('Split squat',3,8,'reps',{detail:'Each leg · back foot stays on floor',weighted:false,rest:75}),ex('Incline dumbbell press',3,8,'reps',{range:'8–10 reps',weighted:true,rest:90})]},
+        {name:'Mobility & spine',note:'Unloaded mobility',exercises:[ex('PVC / broomstick shoulder mobility',3,10,'reps',{detail:'Pain-free shoulder range',weighted:false,rest:30}),ex('Glute bridges',3,12,'reps',{weighted:false,rest:45}),ex('Cobra stretch',3,20,'seconds',{weighted:false,rest:20})]}
+      ]),
+      makeDay(6,'Stamina & Balance','Camp Aguinaldo',[
+        {name:'Warm-up',note:'Easy start',exercises:[ex('Brisk walk',1,3,'minutes',{weighted:false,rest:15}),ex('Ankle bounces',1,10,'reps',{weighted:false,rest:15})]},
+        {name:'Stamina',note:'Conversational pace',exercises:[ex('Brisk walk / easy jog',1,25,'minutes',{range:'25–30 minutes',weighted:false,rest:0})]},
+        {name:'Balance basics',note:'Use a low, stable curb and safe open area',exercises:[ex('Low curb step-ups & balance walks',1,10,'minutes',{weighted:false,rest:0}),ex('Supported deep squat hold',2,30,'seconds',{detail:'Hold a stable support if needed',weighted:false,rest:30})]}
+      ]),
+      makeDay(7,'Full Rest','Recovery',[],true)
+    ],
+    2: [
+      makeDay(1,'Legs & Bounce','Anytime Fitness',[
+        {name:'Explosive primer',note:'Low-impact and coached',exercises:[ex('Pogo hops / small jump practice',3,4,'reps',{detail:'Small, quiet landings',weighted:false,rest:60})]},
+        {name:'Strength',note:'Coach-supervised technique; no max attempts',exercises:[ex('Barbell back squat',4,5,'reps',{range:'5–6 reps',weighted:true,rest:150}),ex('Barbell Romanian deadlift',3,8,'reps',{weighted:true,rest:90}),ex('Leg press',3,10,'reps',{weighted:true,rest:90})]},
+        {name:'Stretching · last',note:'Comfortable range',exercises:[ex('Bodyweight ATG split squat',2,8,'reps',{detail:'Each leg; use support if needed',weighted:false,rest:30})]}
+      ]),
+      makeDay(2,'Speed & Acro Basics','Camp Aguinaldo',[
+        {name:'Speed',note:'Build gradually; avoid all-out sprinting',exercises:[ex('40 m controlled sprints',5,40,'meters',{detail:'Up to about 85% only if coached and pain-free; rest 2 min',weighted:false,rest:120})]},
+        {name:'Acro skill block',note:'Coach-supervised, on suitable mats with spotting; no solo inversion or tumbling attempts',exercises:[ex('Wall handstand preparation',1,1,'coach-led',{weighted:false,rest:0,noSets:true}),ex('Candlestick roll / cartwheel progressions',1,1,'coach-led',{weighted:false,rest:0,noSets:true})]},
+        {name:'Mobility · last',note:'Do not force splits',exercises:[ex('Half-split mobility',1,45,'seconds',{detail:'Each side',weighted:false,rest:20}),ex('Wide straddle hold',1,45,'seconds',{weighted:false,rest:20})]}
+      ]),
+      makeDay(3,'Push & Core','Anytime Fitness',[
+        {name:'Explosive primer',note:'Stable surface; controlled landing',exercises:[ex('Floor plyometric push-up preparation',3,5,'reps',{detail:'Use incline variation if needed; no clapping required',weighted:false,rest:60})]},
+        {name:'Strength',note:'Leave comfortable reps in reserve',exercises:[ex('Barbell bench press',4,5,'reps',{range:'5–6 reps',weighted:true,rest:150}),ex('Pike push-up',3,6,'reps',{range:'6–8 reps',detail:'Keep feet on floor; no elevated setup needed',weighted:false,rest:90}),ex('Assisted dip machine',3,6,'reps',{range:'6–8 reps',weighted:false,rest:90})]},
+        {name:'Accessories & core',note:'Controlled reps and supported holds',exercises:[ex('Dumbbell lateral raises',4,12,'reps',{weighted:true,rest:60}),ex('Tucked L-sit preparation',3,15,'seconds',{detail:'Use feet-assisted support',weighted:false,rest:45}),ex('Hanging knee-to-chest raises',3,10,'reps',{weighted:false,rest:60})]}
+      ]),
+      makeDay(4,'Pull, Grip & Stamina','Anytime Fitness',[
+        {name:'Strength',note:'Coach-supervised resistance training',exercises:[ex('Barbell deadlift',3,5,'reps',{range:'5–6 reps',weighted:true,rest:180}),ex('Assisted / band-assisted pull-ups',4,6,'reps',{weighted:false,rest:120}),ex('Barbell row',3,8,'reps',{weighted:true,rest:90})]},
+        {name:'Accessories & grip',note:'Comfortable loads and holds',exercises:[ex('Hammer curls',3,8,'reps',{range:'8–10 reps',weighted:true,rest:60}),ex('Dead hang',3,30,'seconds',{detail:'Stop before grip fails',weighted:false,rest:60})]},
+        {name:'Stamina',note:'Moderate intervals',exercises:[ex('Bike / rower intervals',8,20,'seconds',{detail:'20 sec brisk / 40 sec easy',weighted:false,rest:40})]}
+      ]),
+      makeDay(5,'Single-Leg & Spine','Anytime Fitness',[
+        {name:'Explosive primer',note:'Low step; supervised',exercises:[ex('Low step-up drive',3,4,'reps',{detail:'Each leg; use controlled step-up rather than jumping',weighted:false,rest:75})]},
+        {name:'Strength',note:'Controlled unilateral work',exercises:[ex('Bulgarian split squat',3,8,'reps',{detail:'Each leg; use support as needed',weighted:false,rest:90}),ex('Wide push-ups',3,8,'reps',{detail:'Use incline if needed',weighted:false,rest:60})]},
+        {name:'Mobility & spine',note:'Advanced shoulder and loaded spinal skills are not logged as unsupervised exercises',exercises:[ex('Skin-the-cat progression',1,1,'coach-led',{detail:'Qualified gymnastics coach and appropriate equipment only',weighted:false,rest:0,noSets:true}),ex('Jefferson curl progression',1,1,'coach-led',{detail:'Do not add loaded deep spinal flexion without qualified clinical/coaching guidance',weighted:false,rest:0,noSets:true}),ex('Elevated bridge preparation',1,1,'coach-led',{detail:'Use only a coached, comfortable mobility alternative',weighted:false,rest:0,noSets:true})]}
+      ]),
+      makeDay(6,'Stamina & Parkour Basics','Camp Aguinaldo',[
+        {name:'Stamina',note:'Steady conversational pace',exercises:[ex('Steady jog / brisk walk',1,30,'minutes',{weighted:false,rest:0})]},
+        {name:'Movement basics',note:'No precision jumps or rail work without a qualified parkour coach and suitable facility',exercises:[ex('Low-level movement & bear crawl practice',1,15,'minutes',{detail:'Ground-level, clear area; coach guidance',weighted:false,rest:0}),ex('Deep squat hold',1,45,'seconds',{detail:'Supported if needed',weighted:false,rest:20})]}
+      ]),
+      makeDay(7,'Full Rest','Recovery',[],true)
+    ],
+    3: [
+      makeDay(1,'Legs & Bounce','Gym · Coach supervised',[
+        {name:'Primer',note:'Only progress if cleared by coach; no maximal jumps',exercises:[ex('Pogo hop & squat jump technique',1,1,'coach-led',{weighted:false,rest:0,noSets:true})]},
+        {name:'Strength',note:'No 1-rep maxes; choose loads that allow clean technique',exercises:[ex('Barbell squat progression',4,5,'reps',{range:'5–6 reps · coach-selected load',weighted:true,rest:150}),ex('Romanian deadlift',3,8,'reps',{weighted:true,rest:90}),ex('Leg press',3,10,'reps',{weighted:true,rest:90})]},
+        {name:'Accessory',note:'Bodyweight or light resistance',exercises:[ex('ATG split squat progression',2,8,'reps',{detail:'Each leg · support if needed',weighted:false,rest:45})]}
+      ]),
+      makeDay(2,'Speed & Gymnastics Skills','Coach-supervised facility',[
+        {name:'Speed',note:'Sprint training only with qualified supervision and appropriate space',exercises:[ex('40 m sprint technique',1,1,'coach-led',{weighted:false,rest:0,noSets:true})]},
+        {name:'Gymnastics skills',note:'Handstands, rolls and advanced tumbling only in a coached gymnastics facility with mats and spotting',exercises:[ex('Handstand / roll / cartwheel skill session',1,1,'coach-led',{weighted:false,rest:0,noSets:true})]},
+        {name:'Mobility · last',note:'Gentle flexibility; never force end range',exercises:[ex('Front split / pancake mobility',1,1,'coach-led',{weighted:false,rest:0,noSets:true})]}
+      ]),
+      makeDay(3,'Push & Core','Gym · Coach supervised',[
+        {name:'Primer',note:'Controlled power; no need to clap',exercises:[ex('Push-up power preparation',3,5,'reps',{detail:'Incline variation if needed',weighted:false,rest:60})]},
+        {name:'Strength',note:'Technique-first resistance',exercises:[ex('Bench press',4,5,'reps',{range:'5–6 reps · coach-selected load',weighted:true,rest:150}),ex('Pike push-up progression',3,6,'reps',{range:'6–8 reps',weighted:false,rest:90}),ex('Assisted parallel-bar dip',3,6,'reps',{weighted:false,rest:90})]},
+        {name:'Accessories & core',note:'Use controlled, supported variations',exercises:[ex('Lateral raises',3,12,'reps',{weighted:true,rest:60}),ex('L-sit progression',3,10,'seconds',{detail:'Feet-assisted as needed',weighted:false,rest:45}),ex('Hanging knee raise',3,8,'reps',{weighted:false,rest:60})]}
+      ]),
+      makeDay(4,'Pull, Grip & Stamina','Gym · Coach supervised',[
+        {name:'Strength',note:'No maximal deadlifts or explosive pull-up attempts',exercises:[ex('Deadlift technique',3,5,'reps',{weighted:true,rest:180}),ex('Assisted pull-up / pulldown',4,6,'reps',{weighted:false,rest:120}),ex('Supported row',3,8,'reps',{weighted:true,rest:90})]},
+        {name:'Grip & accessories',note:'Stop before form or grip fails',exercises:[ex('Hammer curls',3,8,'reps',{weighted:true,rest:60}),ex('Comfortable dead hang',3,20,'seconds',{weighted:false,rest:60})]},
+        {name:'Stamina',note:'Moderate conditioning',exercises:[ex('Bike / rower intervals',6,20,'seconds',{detail:'20 sec brisk / 40 sec easy',weighted:false,rest:40})]}
+      ]),
+      makeDay(5,'Single-Leg & Mobility','Coach-supervised facility',[
+        {name:'Strength',note:'Controlled unilateral strength',exercises:[ex('Step-up',3,5,'reps',{detail:'Each leg; no jump required',weighted:false,rest:75}),ex('Bulgarian split squat',3,8,'reps',{detail:'Each leg; use support as needed',weighted:false,rest:90}),ex('Push-up progression',3,8,'reps',{weighted:false,rest:60})]},
+        {name:'Advanced mobility skills',note:'German hangs, skin-the-cat, loaded Jefferson curls and full back bridges are not suitable for unsupervised practice',exercises:[ex('Shoulder / spine mobility session',1,1,'coach-led',{detail:'Qualified gymnastics or physiotherapy professional selects an appropriate progression',weighted:false,rest:0,noSets:true})]}
+      ]),
+      makeDay(6,'Stamina & Movement','Outdoor · safe ground-level practice',[
+        {name:'Stamina',note:'Conversational pace',exercises:[ex('Zone 2 walk / easy jog',1,30,'minutes',{range:'30–35 minutes',weighted:false,rest:0})]},
+        {name:'Movement basics',note:'Ground-level movement only unless coached in a suitable facility',exercises:[ex('Balance walk / quadrupedal movement',1,15,'minutes',{weighted:false,rest:0})]}
+      ]),
+      makeDay(7,'Full Rest','Recovery',[],true)
+    ]
+  };
+  let ROUTINES = STAGE_ROUTINES[1];
+
 
   function ex(name, sets, value, unit, opts = {}) {
     return { name, sets, value, unit, detail: '', range: '', weighted: false, rest: 90, noSets: false, ...opts };
@@ -353,6 +312,7 @@
     return {
       version: 1,
       rotationDay: 1,
+      selectedStage: 1,
       settings: { defaultRest: 90, chime: true, exerciseRest: {} },
       active: null,
       history: [],
@@ -361,6 +321,7 @@
     };
   }
   let data = loadData();
+  ROUTINES = STAGE_ROUTINES[data.selectedStage || 1];
   let currentTab = 'today';
   let uiTimer = null;
   let toastTimer = null;
@@ -371,7 +332,7 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultData();
       const parsed = JSON.parse(raw);
-      return { ...defaultData(), ...parsed, settings: { ...defaultData().settings, ...(parsed.settings || {}), exerciseRest: { ...(parsed.settings?.exerciseRest || {}) } }, history: Array.isArray(parsed.history) ? parsed.history : [] };
+      return { ...defaultData(), ...parsed, selectedStage: [1,2,3].includes(parsed.selectedStage) ? parsed.selectedStage : 1, settings: { ...defaultData().settings, ...(parsed.settings || {}), exerciseRest: { ...(parsed.settings?.exerciseRest || {}) } }, history: Array.isArray(parsed.history) ? parsed.history : [] };
     } catch (err) {
       console.warn('Could not load saved workout data:', err);
       return defaultData();
@@ -388,8 +349,8 @@
   function pad(n) { return String(Math.max(0, Math.floor(n))).padStart(2, '0'); }
   function formatClock(seconds) { return `${pad(seconds / 60)}:${pad(seconds % 60)}`; }
   function formatDuration(ms) { return formatClock(Math.floor(ms / 1000)); }
-  function routineForDay(day) { return ROUTINES.find(r => r.id === day) || ROUTINES[0]; }
-  function todayRoutine() { return data.active ? routineForDay(data.active.day) : routineForDay(data.rotationDay); }
+  function routineForDay(day, stage = data.selectedStage || 1) { return (STAGE_ROUTINES[stage] || STAGE_ROUTINES[1]).find(r => r.id === day) || STAGE_ROUTINES[1][0]; }
+  function todayRoutine() { return data.active ? routineForDay(data.active.day, data.active.stage || data.selectedStage) : routineForDay(data.rotationDay); }
   function localDateKey(date = new Date()) {
     return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
   }
@@ -406,7 +367,7 @@
   }
   function updateHeader() {
     const routine = todayRoutine();
-    document.getElementById('header-workout').textContent = `${DAY_NAMES[routine.id - 1]} · ${routine.title}`;
+    document.getElementById('header-workout').textContent = `STAGE ${data.active?.stage || data.selectedStage || 1} · ${DAY_NAMES[routine.id - 1]} · ${routine.title}`;
     if (data.active) {
       document.getElementById('elapsed-time').textContent = formatDuration(Date.now() - data.active.startedAt);
     } else {
@@ -415,7 +376,7 @@
   }
   function startWorkout() {
     if (data.active) return;
-    const routine = routineForDay(data.rotationDay);
+    const routine = routineForDay(data.rotationDay, data.selectedStage);
     if (routine.restDay) { showToast('Today is set as a rest day. Recovery counts.'); return; }
     const exercises = {};
     routine.phases.forEach((phase, pi) => phase.exercises.forEach((exercise, ei) => {
@@ -431,7 +392,7 @@
         }))
       };
     }));
-    data.active = { day: routine.id, title: routine.title, startedAt: Date.now(), exercises, rest: null };
+    data.active = { day: routine.id, stage: data.selectedStage, title: routine.title, startedAt: Date.now(), exercises, rest: null };
     save();
     renderToday();
     showToast('Workout started.');
@@ -439,7 +400,7 @@
   function completeWorkout() {
     if (!data.active) return;
     const active = data.active;
-    const routine = routineForDay(active.day);
+    const routine = routineForDay(active.day, active.stage || data.selectedStage);
     let totalSets = 0, completedSets = 0;
     routine.phases.forEach((phase, pi) => phase.exercises.forEach((exercise, ei) => {
       if (exercise.noSets) return;
@@ -454,6 +415,7 @@
     data.history.unshift({
       id: `${active.startedAt}-${Math.random().toString(36).slice(2, 7)}`,
       day: active.day,
+      stage: active.stage || data.selectedStage,
       title: active.title,
       startedAt: active.startedAt,
       endedAt,
@@ -485,7 +447,7 @@
     set.done = checked;
     if (checked) {
       const [pi, ei] = exerciseId.split('-').map(Number);
-      const exercise = routineForDay(data.active.day).phases[pi].exercises[ei];
+      const exercise = routineForDay(data.active.day, data.active.stage || data.selectedStage).phases[pi].exercises[ei];
       const rest = data.active.exercises[exerciseId].rest ?? exercise.rest ?? data.settings.defaultRest ?? 90;
       if (rest > 0) data.active.rest = { endAt: Date.now() + rest * 1000, seconds: rest, exercise: exercise.name };
       else data.active.rest = null;
@@ -516,7 +478,7 @@
     if (!state) return;
     state.rest = Math.max(0, Math.min(600, (state.rest ?? 90) + delta));
     const [pi, ei] = exerciseId.split('-').map(Number);
-    const exerciseName = routineForDay(data.active.day).phases[pi].exercises[ei].name;
+    const exerciseName = routineForDay(data.active.day, data.active.stage || data.selectedStage).phases[pi].exercises[ei].name;
     data.settings.exerciseRest = data.settings.exerciseRest || {};
     data.settings.exerciseRest[exerciseName] = state.rest;
     save();
@@ -606,7 +568,7 @@
       document.getElementById('action-dock').innerHTML = '';
       return;
     }
-    let html = `<div class="screen-head"><div class="eyebrow">${DAY_NAMES[routine.id-1]} · ${escapeHtml(routine.location)}</div><h1>${escapeHtml(routine.title)}</h1><p>${active ? 'Session in progress · changes save automatically on this device.' : 'Review the session, then start when you are ready.'}</p></div>`;
+    let html = `<div class="screen-head"><div class="eyebrow">STAGE ${active?.stage || data.selectedStage || 1} · ${DAY_NAMES[routine.id-1]} · ${escapeHtml(routine.location)}</div><h1>${escapeHtml(routine.title)}</h1><p>${active ? 'Session in progress · changes save automatically on this device.' : 'Review the session, then start when you are ready.'}</p></div>`;
     if (!active) {
       const count = routine.phases.reduce((sum, p) => sum + p.exercises.length, 0);
       html += `<div class="row list-row"><div class="left"><div class="row-title">Session outline</div><div class="row-sub">${routine.phases.length} phases · ${count} movements</div></div><div class="right">Not started</div></div>`;
@@ -633,19 +595,34 @@
       : `<button class="primary" data-action="start">Start workout</button>`;
   }
   function renderRoutines() {
-    document.getElementById('routines-content').innerHTML = ROUTINES.map(r => {
+    ROUTINES = STAGE_ROUTINES[data.selectedStage || 1];
+    const stageInfo = {
+      1: ['Foundation Phase','Weeks 1–6','Build movement quality, basic strength and comfortable mobility.'],
+      2: ['Intermediate Phase','Weeks 7–14','Progress gradually when the foundation criteria are met.'],
+      3: ['Hybrid Development','Month 4+','Advanced skills remain coach-supervised; this is not a requirement to rush toward.']
+    }[data.selectedStage || 1];
+    const selector = `<div class="section-label">Training stage</div>
+      <div class="week-actions">${[1,2,3].map(n=>`<button class="${data.selectedStage===n?'primary':'secondary'}" data-action="select-stage" data-stage="${n}">Stage ${n}</button>`).join('')}</div>
+      <div class="row"><div class="row-title">${stageInfo[0]} · ${stageInfo[1]}</div><div class="row-sub">${stageInfo[2]}</div></div>`;
+    const criteria = data.selectedStage === 1
+      ? `<div class="row"><div class="row-title">Stage 2 readiness check</div><div class="row-sub">Your roadmap lists: two weeks of clean, consistent sets; a comfortable 30-second dead hang; 10 clean floor push-ups; and a comfortable toe-touch or mid-shin reach. These are guideposts, not a deadline. Ask a qualified coach and parent/guardian before progressing.</div></div>`
+      : data.selectedStage === 2
+      ? `<div class="row"><div class="row-title">Stage 3 readiness check</div><div class="row-sub">Your roadmap lists pull-ups, parallel-bar dips, a wall handstand and a floor bridge. Have a qualified coach assess readiness; do not attempt advanced skills alone.</div></div>`
+      : `<div class="row"><div class="row-title">Stage 3 safety note</div><div class="row-sub">Advanced gymnastics, deep shoulder positions, sprinting and parkour need qualified coaching, appropriate equipment and a suitable facility. The app uses supervised skill blocks rather than unsupervised instructions.</div></div>`;
+    document.getElementById('routines-content').innerHTML = selector + ROUTINES.map(r => {
       const preview = r.restDay ? 'No training · recovery' : r.phases.map(p => p.name).join(' → ');
       return `<div class="routine-day"><div class="list-row"><strong>${DAY_NAMES[r.id-1]} · ${escapeHtml(r.title)}</strong><span class="right">${r.restDay ? 'REST' : escapeHtml(r.location)}</span></div><p>${escapeHtml(preview)}</p><button class="secondary small-button" data-action="select-day" data-day="${r.id}">${data.rotationDay === r.id ? 'Current day' : 'Set as today'}</button></div>`;
-    }).join('') + `<div class="inline-note">Changing the current day updates your rotation. An active workout is not changed.</div>`;
+    }).join('') + criteria + `<div class="inline-note">Switching stages changes the program used for new sessions. Existing workout history stays attached to its original stage.</div>`;
   }
   function renderHistory() {
     const el = document.getElementById('history-content');
     if (!data.history.length) { el.innerHTML = `<div class="history-empty">No completed sessions yet. Finish a workout and it will appear here.</div>`; return; }
-    el.innerHTML = data.history.map(h => `<div class="row"><div class="list-row"><div class="left"><div class="row-title">${DAY_NAMES[h.day-1]} · ${escapeHtml(h.title)}</div><div class="row-sub">${displayDate(h.startedAt)}</div></div><div class="right">${formatDuration(h.durationMs)}</div></div><div class="history-summary"><span>${h.completedSets}/${h.totalSets} sets checked</span><span>${new Date(h.endedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div><button class="secondary small-button" style="margin-top:10px" data-action="history-detail" data-id="${escapeHtml(h.id)}">View session</button><div class="history-detail hidden" id="history-detail-${escapeHtml(h.id)}"></div></div>`).join('');
+    el.innerHTML = data.history.map(h => `<div class="row"><div class="list-row"><div class="left"><div class="row-title">STAGE ${h.stage || 1} · ${DAY_NAMES[h.day-1]} · ${escapeHtml(h.title)}</div><div class="row-sub">${displayDate(h.startedAt)}</div></div><div class="right">${formatDuration(h.durationMs)}</div></div><div class="history-summary"><span>${h.completedSets}/${h.totalSets} sets checked</span><span>${new Date(h.endedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div><button class="secondary small-button" style="margin-top:10px" data-action="history-detail" data-id="${escapeHtml(h.id)}">View session</button><div class="history-detail hidden" id="history-detail-${escapeHtml(h.id)}"></div></div>`).join('');
   }
   function renderSettings() {
     document.getElementById('settings-content').innerHTML = `
       <div class="section-label">Workout preferences</div>
+      <div class="row"><div class="row-title">Current training stage</div><div class="row-sub">Stage ${data.selectedStage || 1}. Change stages in the Routines tab when readiness criteria are met.</div></div>
       <div class="row setting-row"><div class="copy"><span class="setting-name">Default rest timer</span><small>Used for new exercise timers; adjust each exercise during a workout.</small></div><select id="default-rest"><option value="60">1:00</option><option value="75">1:15</option><option value="90">1:30</option><option value="120">2:00</option><option value="150">2:30</option><option value="180">3:00</option></select></div>
       <div class="row setting-row"><div class="copy"><span class="setting-name">Rest-complete chime</span><small>Short tone when the rest timer reaches zero.</small></div><input id="chime-toggle" type="checkbox" ${data.settings.chime ? 'checked' : ''} aria-label="Enable rest chime"></div>
       <div class="section-label">JSON backup</div>
@@ -712,6 +689,13 @@
     else if (action === 'rest') adjustRest(button.dataset.exercise, Number(button.dataset.delta));
     else if (action === 'export') exportData();
     else if (action === 'import') document.getElementById('import-file').click();
+    else if (action === 'select-stage') {
+      if (data.active) { showToast('Finish the active workout before changing stages.'); return; }
+      data.selectedStage = Math.min(3, Math.max(1, Number(button.dataset.stage)));
+      ROUTINES = STAGE_ROUTINES[data.selectedStage];
+      data.rotationDay = 1;
+      save(); renderAll(); showToast(`Stage ${data.selectedStage} selected.`);
+    }
     else if (action === 'select-day') {
       if (data.active) { showToast('Finish the active workout before changing the rotation.'); return; }
       data.rotationDay = Number(button.dataset.day); save(); renderAll(); showToast(`Today set to ${DAY_NAMES[data.rotationDay-1]}.`);
@@ -722,7 +706,7 @@
       if (!h || !target) return;
       if (!target.classList.contains('hidden')) { target.classList.add('hidden'); button.textContent = 'View session'; return; }
       let details = '';
-      const routine = routineForDay(h.day);
+      const routine = routineForDay(h.day, h.stage || 1);
       routine.phases.forEach((phase, pi) => {
         phase.exercises.forEach((exercise, ei) => {
           const state = h.exercises?.[`${pi}-${ei}`];
